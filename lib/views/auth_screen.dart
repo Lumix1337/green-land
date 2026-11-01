@@ -39,7 +39,9 @@ class _AuthScreenState extends State<AuthScreen> {
             onPressed: () => provider.toggleLanguage(),
             icon: const Icon(Icons.language_rounded, color: AppTheme.primary, size: 18),
             label: Text(
-              provider.language == AppLanguage.ru ? 'ҚАЗ' : 'РУС',
+              provider.language == AppLanguage.ru
+                  ? 'РУС'
+                  : (provider.language == AppLanguage.kz ? 'ҚАЗ' : 'ENG'),
               style: const TextStyle(
                 color: AppTheme.primary,
                 fontWeight: FontWeight.w700,

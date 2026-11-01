@@ -128,9 +128,9 @@ class ControlScreen extends StatelessWidget {
                   provider.toggleActuator('lighting', false);
                 },
                 icon: const Icon(Icons.power_settings_new_rounded, color: AppTheme.statusDanger),
-                label: const Text(
-                  'Выключить все приборы',
-                  style: TextStyle(
+                label: Text(
+                  l10n.tr('btn_turn_all_off'),
+                  style: const TextStyle(
                     color: AppTheme.statusDanger,
                     fontWeight: FontWeight.w700,
                   ),

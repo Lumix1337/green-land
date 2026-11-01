@@ -113,12 +113,12 @@ class SettingsScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
-                      children: const [
-                        Icon(Icons.translate_rounded, color: AppTheme.primary, size: 22),
-                        SizedBox(width: 12),
+                      children: [
+                        const Icon(Icons.translate_rounded, color: AppTheme.primary, size: 22),
+                        const SizedBox(width: 12),
                         Text(
-                          'Тіл / Язык интерфейса',
-                          style: TextStyle(
+                          l10n.tr('lang_selector_title'),
+                          style: const TextStyle(
                             color: AppTheme.textPrimary,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -130,6 +130,7 @@ class SettingsScreen extends StatelessWidget {
                       segments: const [
                         ButtonSegment(value: AppLanguage.ru, label: Text('РУС')),
                         ButtonSegment(value: AppLanguage.kz, label: Text('ҚАЗ')),
+                        ButtonSegment(value: AppLanguage.en, label: Text('ENG')),
                       ],
                       selected: {provider.language},
                       onSelectionChanged: (Set<AppLanguage> newSelection) {
@@ -317,7 +318,7 @@ class SettingsScreen extends StatelessWidget {
                   onLogout();
                 },
                 icon: const Icon(Icons.logout_rounded, color: AppTheme.statusDanger),
-                label: const Text('Выйти из системы'),
+                label: Text(l10n.tr('btn_logout')),
               ),
 
               const SizedBox(height: 20),

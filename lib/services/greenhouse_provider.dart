@@ -44,7 +44,17 @@ class GreenhouseProvider extends ChangeNotifier {
   }
 
   void toggleLanguage() {
-    _language = _language == AppLanguage.ru ? AppLanguage.kz : AppLanguage.ru;
+    switch (_language) {
+      case AppLanguage.ru:
+        _language = AppLanguage.kz;
+        break;
+      case AppLanguage.kz:
+        _language = AppLanguage.en;
+        break;
+      case AppLanguage.en:
+        _language = AppLanguage.ru;
+        break;
+    }
     notifyListeners();
   }
 

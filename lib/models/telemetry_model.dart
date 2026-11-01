@@ -1,3 +1,5 @@
+import '../l10n/app_localizations.dart';
+
 class TelemetryModel {
   final double airTemp;        // °C
   final double airHumidity;    // %
@@ -18,13 +20,37 @@ class TelemetryModel {
   bool get isAirTempLow => airTemp < 16.0;
   bool get isOptimal => !isSoilMoistureLow && !isAirTempHigh && !isAirTempLow;
 
-  String get timeAgo {
+  String getTimeAgo([AppLanguage language = AppLanguage.ru]) {
     final diff = DateTime.now().difference(timestamp);
-    if (diff.inSeconds < 10) return 'только что';
-    if (diff.inSeconds < 60) return '${diff.inSeconds} сек. назад';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} мин. назад';
-    return '${diff.inHours} ч. назад';
+    if (diff.inSeconds < 10) {
+      switch (language) {
+        case AppLanguage.kz: return 'жаңа ғана';
+        case AppLanguage.en: return 'just now';
+        case AppLanguage.ru: return 'только что';
+      }
+    }
+    if (diff.inSeconds < 60) {
+      switch (language) {
+        case AppLanguage.kz: return '${diff.inSeconds} сек. бұрын';
+        case AppLanguage.en: return '${diff.inSeconds}s ago';
+        case AppLanguage.ru: return '${diff.inSeconds} сек. назад';
+      }
+    }
+    if (diff.inMinutes < 60) {
+      switch (language) {
+        case AppLanguage.kz: return '${diff.inMinutes} мин. бұрын';
+        case AppLanguage.en: return '${diff.inMinutes}m ago';
+        case AppLanguage.ru: return '${diff.inMinutes} мин. назад';
+      }
+    }
+    switch (language) {
+      case AppLanguage.kz: return '${diff.inHours} сағ. бұрын';
+      case AppLanguage.en: return '${diff.inHours}h ago';
+      case AppLanguage.ru: return '${diff.inHours} ч. назад';
+    }
   }
+
+  String get timeAgo => getTimeAgo(AppLanguage.ru);
 
   factory TelemetryModel.fromJson(Map<String, dynamic> json) {
     return TelemetryModel(

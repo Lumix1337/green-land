@@ -22,14 +22,16 @@ class DashboardScreen extends StatelessWidget {
             ? MetricStatus.warning 
             : MetricStatus.normal;
     final tempStatusText = tempStatus == MetricStatus.normal 
-        ? 'Норма' 
-        : (tempStatus == MetricStatus.danger ? 'Перегрев' : 'Внимание');
+        ? l10n.tr('chip_normal') 
+        : (tempStatus == MetricStatus.danger ? l10n.tr('chip_overheat') : l10n.tr('chip_warning'));
 
     // 2. Air Humidity (Optimal: 50 - 75%)
     final humidityStatus = (telemetry.airHumidity < 40.0 || telemetry.airHumidity > 85.0)
         ? MetricStatus.warning
         : MetricStatus.normal;
-    final humidityStatusText = humidityStatus == MetricStatus.normal ? 'Норма' : 'Внимание';
+    final humidityStatusText = humidityStatus == MetricStatus.normal 
+        ? l10n.tr('chip_normal') 
+        : l10n.tr('chip_warning');
 
     // 3. Soil Moisture (Optimal: 35 - 70%)
     final soilStatus = telemetry.soilMoisture < 30.0
@@ -38,12 +40,12 @@ class DashboardScreen extends StatelessWidget {
             ? MetricStatus.warning
             : MetricStatus.normal;
     final soilStatusText = soilStatus == MetricStatus.normal 
-        ? 'Норма' 
-        : (soilStatus == MetricStatus.danger ? 'Засуха' : 'Сухо');
+        ? l10n.tr('chip_normal') 
+        : (soilStatus == MetricStatus.danger ? l10n.tr('chip_drought') : l10n.tr('chip_dry'));
 
     // 4. Light Level (Optimal: 5000 - 20000 Lux in daytime)
     final lightStatus = MetricStatus.normal;
-    const lightStatusText = 'Оптимум';
+    final lightStatusText = l10n.tr('chip_optimum');
 
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
@@ -85,10 +87,10 @@ class DashboardScreen extends StatelessWidget {
               PopupMenuItem(
                 value: 'trigger_overheat',
                 child: Row(
-                  children: const [
-                    Icon(Icons.local_fire_department_rounded, color: AppTheme.statusDanger, size: 20),
-                    SizedBox(width: 10),
-                    Text('Сценарий 2: Перегрев'),
+                  children: [
+                    const Icon(Icons.local_fire_department_rounded, color: AppTheme.statusDanger, size: 20),
+                    const SizedBox(width: 10),
+                    Text(l10n.tr('scenario2_overheat')),
                   ],
                 ),
               ),
@@ -102,7 +104,7 @@ class DashboardScreen extends StatelessWidget {
                       size: 20,
                     ),
                     const SizedBox(width: 10),
-                    Text(provider.isOffline ? 'Восстановить связь' : 'Стресс-тест M8 (Офлайн)'),
+                    Text(provider.isOffline ? l10n.tr('restore_connection') : l10n.tr('stress_test_action')),
                   ],
                 ),
               ),
@@ -133,7 +135,7 @@ class DashboardScreen extends StatelessWidget {
                   statusText: telemetry.isOptimal 
                       ? l10n.tr('status_all_good') 
                       : l10n.tr('status_warning'),
-                  lastUpdateText: '${l10n.tr('last_update')}: ${telemetry.timeAgo}',
+                  lastUpdateText: '${l10n.tr('last_update')}: ${telemetry.getTimeAgo(provider.language)}',
                   offlineTitle: l10n.tr('offline_banner_title'),
                   offlineDesc: l10n.tr('offline_banner_desc'),
                   onDismissAlert: () => provider.dismissAlert(),
