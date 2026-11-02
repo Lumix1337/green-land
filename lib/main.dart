@@ -1,11 +1,18 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/greenhouse_provider.dart';
+import 'services/supabase_service.dart';
+import 'controllers/auth_controller.dart';
+import 'controllers/telemetry_controller.dart';
+import 'controllers/actuator_controller.dart';
+import 'controllers/alert_controller.dart';
+import 'controllers/analytics_controller.dart';
 import 'theme/app_theme.dart';
 import 'views/auth_screen.dart';
 import 'views/main_navigation_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // M8 Failure Handling: Global exception handler to prevent any app crashes
@@ -14,10 +21,22 @@ void main() {
     debugPrint('GreenLand Global Error Caught: ${details.exception}');
   };
 
+  // Task 1: Resilient initialization of Supabase SDK (M1, M8)
+  try {
+    await SupabaseService().initialize();
+  } catch (e) {
+    debugPrint('🛡️ [SupabaseService] Initialized in resilient offline mode: $e');
+  }
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => GreenhouseProvider()),
+        ChangeNotifierProvider(create: (_) => AuthController()),
+        ChangeNotifierProvider(create: (_) => TelemetryController()),
+        ChangeNotifierProvider(create: (_) => ActuatorController()),
+        ChangeNotifierProvider(create: (_) => AlertController()),
+        ChangeNotifierProvider(create: (_) => AnalyticsController()),
       ],
       child: const GreenLandApp(),
     ),
