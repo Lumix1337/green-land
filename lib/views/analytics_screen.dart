@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/greenhouse_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/fl_telemetry_chart.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -12,6 +13,7 @@ class AnalyticsScreen extends StatefulWidget {
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int _selectedPeriod = 7; // 1 for 24h, 7 for 7 days
+  bool _useLineChart = true; // FlChart LineChart vs Bar view
 
   // Mock historical points for soil moisture (7 days)
   final List<double> _soil7Days = [52.0, 48.0, 42.0, 24.5, 68.0, 54.0, 45.0];
@@ -20,15 +22,38 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   // Mock historical points for air temperature (7 days)
   final List<double> _temp7Days = [22.4, 25.1, 28.6, 32.2, 23.5, 24.0, 24.2];
 
+  // 24 hour points
+  final List<double> _soil24h = [46.0, 45.2, 44.1, 41.5, 58.0, 54.2, 51.0];
+  final List<double> _temp24h = [17.5, 16.8, 20.4, 26.8, 25.2, 21.0, 19.3];
+  final List<String> _hours24 = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'];
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<GreenhouseProvider>();
     final l10n = provider.l10n;
 
+    final soilValues = _selectedPeriod == 7 ? _soil7Days : _soil24h;
+    final tempValues = _selectedPeriod == 7 ? _temp7Days : _temp24h;
+    final labels = _selectedPeriod == 7 ? _days7 : _hours24;
+
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
         title: Text(l10n.tr('analytics_title')),
+        actions: [
+          IconButton(
+            tooltip: _useLineChart ? 'Переключить на столбцы' : 'Переключить на fl_chart',
+            icon: Icon(
+              _useLineChart ? Icons.bar_chart_rounded : Icons.show_chart_rounded,
+              color: AppTheme.primaryDark,
+            ),
+            onPressed: () {
+              setState(() {
+                _useLineChart = !_useLineChart;
+              });
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -136,31 +161,53 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
               const SizedBox(height: 20),
 
-              // CHART 1: SOIL MOISTURE (M6)
-              _buildChartCard(
-                title: l10n.tr('chart_soil_title'),
-                unit: '%',
-                icon: Icons.grass_rounded,
-                color: AppTheme.primary,
-                values: _selectedPeriod == 7 ? _soil7Days : [45.0, 44.2, 43.1, 42.0, 58.0, 54.0],
-                labels: _selectedPeriod == 7 ? _days7 : ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
-                threshold: 30.0,
-                thresholdLabel: 'Порог засухи (30%)',
-              ),
+              // CHART 1: SOIL MOISTURE (fl_chart M6)
+              _useLineChart
+                  ? FlTelemetryChart(
+                      title: l10n.tr('chart_soil_title'),
+                      unit: '%',
+                      icon: Icons.grass_rounded,
+                      color: AppTheme.primary,
+                      values: soilValues,
+                      labels: labels,
+                      threshold: 30.0,
+                      thresholdLabel: 'Порог засухи (30%)',
+                    )
+                  : _buildBarChartCard(
+                      title: l10n.tr('chart_soil_title'),
+                      unit: '%',
+                      icon: Icons.grass_rounded,
+                      color: AppTheme.primary,
+                      values: soilValues,
+                      labels: labels,
+                      threshold: 30.0,
+                      thresholdLabel: 'Порог засухи (30%)',
+                    ),
 
               const SizedBox(height: 18),
 
-              // CHART 2: AIR TEMPERATURE (M6)
-              _buildChartCard(
-                title: l10n.tr('chart_temp_title'),
-                unit: '°C',
-                icon: Icons.thermostat_rounded,
-                color: const Color(0xFFE65100),
-                values: _selectedPeriod == 7 ? _temp7Days : [18.2, 17.5, 21.0, 26.5, 25.0, 22.1],
-                labels: _selectedPeriod == 7 ? _days7 : ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
-                threshold: 28.0,
-                thresholdLabel: 'Порог перегрева (28°C)',
-              ),
+              // CHART 2: AIR TEMPERATURE (fl_chart M6)
+              _useLineChart
+                  ? FlTelemetryChart(
+                      title: l10n.tr('chart_temp_title'),
+                      unit: '°C',
+                      icon: Icons.thermostat_rounded,
+                      color: const Color(0xFFE65100),
+                      values: tempValues,
+                      labels: labels,
+                      threshold: 28.0,
+                      thresholdLabel: 'Порог перегрева (28°C)',
+                    )
+                  : _buildBarChartCard(
+                      title: l10n.tr('chart_temp_title'),
+                      unit: '°C',
+                      icon: Icons.thermostat_rounded,
+                      color: const Color(0xFFE65100),
+                      values: tempValues,
+                      labels: labels,
+                      threshold: 28.0,
+                      thresholdLabel: 'Порог перегрева (28°C)',
+                    ),
 
               const SizedBox(height: 20),
             ],
@@ -170,7 +217,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildChartCard({
+  Widget _buildBarChartCard({
     required String title,
     required String unit,
     required IconData icon,
@@ -221,8 +268,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ],
           ),
           const SizedBox(height: 16),
-
-          // Custom responsive bar/histogram rendering
           SizedBox(
             height: 140,
             child: Row(
