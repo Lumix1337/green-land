@@ -14,7 +14,7 @@
 | Роль | Ответственный | Зона ответственности и модули ТЗ |
 | :--- | :--- | :--- |
 | **Mobile UI & Design Lead** | **Lumix** (`olzagula@gmail.com`) | Архитектура интерфейса (5 экранов), GreenLand Design System, верстка M2 (Дашборд), M7 (Настройки), M8 (Отказоустойчивость), адаптивность, двуязычная локализация (RU/KZ). |
-| **Mobile Logic Lead** | *Участник 2* | Управление состоянием (Provider/Bloc), клиентская интеграция с Supabase Realtime, авторизация M1, отправка команд M3, алерты M5, графики M6. |
+| **Mobile Logic Lead** | **KOLYA184** (`nkatkalov605@gmail.com`) | Реактивное состояние (Provider + Controllers), Supabase SDK & Auth (M1), Realtime телеметрия (M2), команды приводов с таймингом < 5с (M3), алерты (M5), fl_chart графики 24ч/7д (M6), отказоустойчивость M8. |
 | **Backend & Cloud Lead** | *Участник 3* | Архитектура PostgreSQL в Supabase, Row Level Security (RLS изоляция данных), Realtime публикации, движок правил автоматики M4. |
 | **Simulator & Feature Lead**| *Участник 4* | Физическая климатическая модель на Python, реакция на команды ($<5$ с), генератор стресс-тестов M8, расчет экономии в тенге. |
 
@@ -54,7 +54,7 @@
    * Индикатор времени отклика приборов ($0.8$ с при нормативе ТЗ $<5$ с).
    * Кнопка аварийного выключения всех систем.
 4. **Аналитика и Графики (`AnalyticsScreen`) — Модуль M6:**
-   * Интерактивные графики влажности почвы и температуры воздуха.
+   * Интерактивные графики влажности почвы и температуры воздуха (на базе `fl_chart`).
    * Переключение временных периодов: **24 часа** и **7 дней**.
    * Лог событий: точка дефицита влаги (Сценарий №4 ТЗ).
 5. **Настройки и Энерго-оптимизатор (`SettingsScreen`) — Модули M4, M7:**
@@ -112,7 +112,7 @@
 ```
 green-land/
 ├── lib/
-│   ├── main.dart                      # Точка входа, краш-хэндлер M8, маршрутизация
+│   ├── main.dart                      # Точка входа, краш-хэндлер M8, DI контроллеров
 │   ├── theme/
 │   │   └── app_theme.dart             # Фирменный стиль GreenLand, цвета, карточки
 │   ├── l10n/
@@ -120,19 +120,34 @@ green-land/
 │   ├── models/
 │   │   ├── telemetry_model.dart       # Модель 4 параметров датчиков M2
 │   │   ├── actuator_model.dart        # Модель 4 исполнительных устройств M3
-│   │   └── settings_model.dart        # Модель порогов M7 и тарифов тенге
+│   │   ├── settings_model.dart        # Модель порогов M7 и тарифов тенге
+│   │   ├── alert_model.dart           # Модель алертов M5 (перегрев, засуха, оффлайн)
+│   │   └── historical_point.dart      # Модель временных рядов для аналитики M6
 │   ├── services/
-│   │   └── greenhouse_provider.dart   # Реактивное состояние, команды, стресс-тест
+│   │   ├── supabase_service.dart      # Инициализация Supabase SDK и оффлайн-фоллбэк
+│   │   ├── auth_service.dart          # Сервис авторизации M1 (Email/Пароль, JWT, сессия)
+│   │   ├── telemetry_service.dart     # Realtime-стрим показаний M2 и сторожевой таймер
+│   │   ├── actuator_service.dart      # Отправка команд M3 в БД с замером задержки < 5с
+│   │   ├── alert_service.dart         # Обработка безопасных порогов и очередь алертов M5
+│   │   ├── error_handler_service.dart # Защита M8: перехват SocketException, непадающий код
+│   │   └── greenhouse_provider.dart   # Главный фасад реактивного состояния (Provider)
+│   ├── controllers/
+│   │   ├── auth_controller.dart       # Контроллер авторизации и демо-входа
+│   │   ├── telemetry_controller.dart  # Контроллер живого потока сенсоров
+│   │   ├── actuator_controller.dart   # Контроллер тумблеров и аварийного останова
+│   │   ├── alert_controller.dart      # Контроллер баннеров предупреждений
+│   │   └── analytics_controller.dart  # Контроллер 24ч/7д аналитики для fl_chart
 │   ├── widgets/
 │   │   ├── metric_card.dart           # Карточка датчика с индикатором нормы
 │   │   ├── actuator_card.dart         # Тумблер прибора с анимацией
 │   │   ├── status_banner.dart         # Баннер здоровья теплицы и оффлайна M8
-│   │   └── savings_card.dart          # Карточка экономии в тенге (Signature Feature)
+│   │   ├── savings_card.dart          # Карточка экономии в тенге (Signature Feature)
+│   │   └── fl_telemetry_chart.dart    # Интерактивный график fl_chart (M6)
 │   └── views/
 │       ├── auth_screen.dart           # Экран входа M1 с демо-профилем
 │       ├── dashboard_screen.dart      # Дашборд с 4 метриками M2
 │       ├── control_screen.dart        # Пульт управления приборами M3
-│       ├── analytics_screen.dart      # Графики за 7 дней M6
+│       ├── analytics_screen.dart      # Графики за 7 дней M6 (fl_chart)
 │       ├── settings_screen.dart       # Настройки порогов и тарифов M7
 │       └── main_navigation_screen.dart# Навигационная панель Material 3
 ├── android/                           # Конфигурация Android сборки
