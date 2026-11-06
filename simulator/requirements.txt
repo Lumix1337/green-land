@@ -1,0 +1,5 @@
+# GreenLand Python Simulator Dependencies
+# Uses Python 3.10+ standard library out-of-the-box with zero mandatory C extensions.
+# Optional packages for live cloud scripts:
+requests>=2.31.0
+python-dotenv>=1.0.0
