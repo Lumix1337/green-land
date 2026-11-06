@@ -6,11 +6,13 @@ import '../models/telemetry_model.dart';
 import '../models/actuator_model.dart';
 import '../models/settings_model.dart';
 import '../models/alert_model.dart';
+import '../models/energy_savings_model.dart';
 import 'supabase_service.dart';
 import 'auth_service.dart';
 import 'telemetry_service.dart';
 import 'actuator_service.dart';
 import 'alert_service.dart';
+import 'energy_optimizer_service.dart';
 
 class GreenhouseProvider extends ChangeNotifier {
   // Underlying specialized services (Mobile Logic Architecture)
@@ -19,6 +21,7 @@ class GreenhouseProvider extends ChangeNotifier {
   final TelemetryService _telemetryService;
   final ActuatorService _actuatorService;
   final AlertService _alertService;
+  final EnergyOptimizerService _energyOptimizerService;
 
   StreamSubscription<TelemetryModel>? _telemetrySub;
   StreamSubscription<ActuatorModel>? _actuatorSub;
@@ -59,6 +62,9 @@ class GreenhouseProvider extends ChangeNotifier {
   TelemetryService get telemetryService => _telemetryService;
   ActuatorService get actuatorService => _actuatorService;
   AlertService get alertService => _alertService;
+  EnergyOptimizerService get energyOptimizerService => _energyOptimizerService;
+  EnergySavingsModel get energySavings =>
+      _energyOptimizerService.calculateSavings(settings: _settings);
 
   GreenhouseProvider({
     SupabaseService? supabaseService,
@@ -66,11 +72,13 @@ class GreenhouseProvider extends ChangeNotifier {
     TelemetryService? telemetryService,
     ActuatorService? actuatorService,
     AlertService? alertService,
+    EnergyOptimizerService? energyOptimizerService,
   })  : _supabaseService = supabaseService ?? SupabaseService(),
         _authService = authService ?? AuthService(),
         _telemetryService = telemetryService ?? TelemetryService(),
         _actuatorService = actuatorService ?? ActuatorService(),
-        _alertService = alertService ?? AlertService() {
+        _alertService = alertService ?? AlertService(),
+        _energyOptimizerService = energyOptimizerService ?? EnergyOptimizerService() {
     _initServiceSubscriptions();
     _startLiveTicker();
   }
