@@ -16,7 +16,7 @@
 | **Mobile UI & Design Lead** | **Lumix** (`olzagula@gmail.com`) | Архитектура интерфейса (5 экранов), GreenLand Design System, верстка M2 (Дашборд), M7 (Настройки), M8 (Отказоустойчивость), адаптивность, двуязычная локализация (RU/KZ). |
 | **Mobile Logic Lead** | **KOLYA184** (`nkatkalov605@gmail.com`) | Реактивное состояние (Provider + Controllers), Supabase SDK & Auth (M1), Realtime телеметрия (M2), команды приводов с таймингом < 5с (M3), алерты (M5), fl_chart графики 24ч/7д (M6), отказоустойчивость M8. |
 | **Backend & Cloud Lead** | *Участник 3* | Архитектура PostgreSQL в Supabase, Row Level Security (RLS изоляция данных), Realtime публикации, движок правил автоматики M4. |
-| **Simulator & Feature Lead**| *Участник 4* | Физическая климатическая модель на Python, реакция на команды ($<5$ с), генератор стресс-тестов M8, расчет экономии в тенге. |
+| **Simulator & Feature Lead**| **infinity889** (`kabijan.nurbol@gmail.com`) | Физическая климатическая модель на Python, реакция на команды ($<5$ с), генератор стресс-тестов M8, расчет экономии в тенге (`EnergyOptimizerService` & `EnergyTariffCalculator`). |
 
 ---
 
@@ -105,12 +105,40 @@
    ```
    Файл будет сгенерирован по пути: `build/app/outputs/flutter-apk/app-release.apk`.
 
+5. Запуск физического симулятора микроклимата и генератора стресс-тестов (Python 3.10+):
+   ```bash
+   # Демо-цикл симуляции микроклимата
+   python3 -m simulator.main --mode demo --ticks 5
+
+   # Расчет финансовой экономии в тенге (Signature Feature: 48 200 ₸/мес)
+   python3 -m simulator.main --mode savings-report
+
+   # Стресс-тест перегрева (Сценарий №2, M5) и проверка реакции < 5с (M3)
+   python3 -m simulator.main --mode stress-overheat
+
+   # Стресс-тест обрыва связи (Сценарий №5, M8)
+   python3 -m simulator.main --mode stress-offline
+
+   # Запуск unit-тестов симулятора
+   python3 -m unittest discover -s simulator/tests -v
+   ```
+
 ---
 
 ## 📂 Архитектура каталогов проекта
 
 ```
 green-land/
+├── simulator/                         # Физический симулятор микроклимата на Python
+│   ├── config.py                      # Константы теплицы 800 м², мощности кВт и тарифы ₸
+│   ├── models.py                      # Модели телеметрии, приводов и отчета экономии
+│   ├── physics_engine.py              # Термодинамическая и гидрологическая модель + правила M4
+│   ├── actuator_listener.py           # Слушатель команд M3 с контролем задержки < 5 с
+│   ├── energy_calculator.py           # Signature Feature: расчет экономии в тенге (KZT)
+│   ├── stress_generator.py            # Генератор стресс-сценариев M5, M6, M8
+│   ├── supabase_client.py             # Отказоустойчивый PostgREST клиент с буфером M8
+│   ├── main.py                        # CLI-интерфейс запуска симулятора и стресс-тестов
+│   └── tests/                         # Полный набор Python unit-тестов (18 тестов)
 ├── lib/
 │   ├── main.dart                      # Точка входа, краш-хэндлер M8, DI контроллеров
 │   ├── theme/
@@ -121,6 +149,7 @@ green-land/
 │   │   ├── telemetry_model.dart       # Модель 4 параметров датчиков M2
 │   │   ├── actuator_model.dart        # Модель 4 исполнительных устройств M3
 │   │   ├── settings_model.dart        # Модель порогов M7 и тарифов тенге
+│   │   ├── energy_savings_model.dart  # Модель детализации экономии кВт⋅ч и тенге
 │   │   ├── alert_model.dart           # Модель алертов M5 (перегрев, засуха, оффлайн)
 │   │   └── historical_point.dart      # Модель временных рядов для аналитики M6
 │   ├── services/
@@ -129,6 +158,7 @@ green-land/
 │   │   ├── telemetry_service.dart     # Realtime-стрим показаний M2 и сторожевой таймер
 │   │   ├── actuator_service.dart      # Отправка команд M3 в БД с замером задержки < 5с
 │   │   ├── alert_service.dart         # Обработка безопасных порогов и очередь алертов M5
+│   │   ├── energy_optimizer_service.dart # Динамический расчет экономии в тенге (Signature Feature)
 │   │   ├── error_handler_service.dart # Защита M8: перехват SocketException, непадающий код
 │   │   └── greenhouse_provider.dart   # Главный фасад реактивного состояния (Provider)
 │   ├── controllers/
@@ -144,12 +174,12 @@ green-land/
 │   │   ├── savings_card.dart          # Карточка экономии в тенге (Signature Feature)
 │   │   └── fl_telemetry_chart.dart    # Интерактивный график fl_chart (M6)
 │   └── views/
-│       ├── auth_screen.dart           # Экран входа M1 с демо-профилем
-│       ├── dashboard_screen.dart      # Дашборд с 4 метриками M2
-│       ├── control_screen.dart        # Пульт управления приборами M3
-│       ├── analytics_screen.dart      # Графики за 7 дней M6 (fl_chart)
-│       ├── settings_screen.dart       # Настройки порогов и тарифов M7
-│       └── main_navigation_screen.dart# Навигационная панель Material 3
+│   ├── auth_screen.dart               # Экран входа M1 с демо-профилем
+│   ├── dashboard_screen.dart          # Дашборд с 4 метриками M2
+│   ├── control_screen.dart            # Пульт управления приборами M3
+│   ├── analytics_screen.dart          # Графики за 7 дней M6 (fl_chart)
+│   ├── settings_screen.dart           # Настройки порогов и тарифов M7
+│   └── main_navigation_screen.dart    # Навигационная панель Material 3
 ├── android/                           # Конфигурация Android сборки
 ├── pubspec.yaml                       # Зависимости проекта
 └── README.md                          # Паспорт проекта и документация

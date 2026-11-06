@@ -33,5 +33,5 @@
    * Supabase integration, state management, remote command execution (M3), alerts (M5).
 3. **Backend & Cloud Database Lead:**
    * PostgreSQL tables, RLS isolation policies (M1), telemetry storage (M6), automation rules (M4).
-4. **Simulator & Energy Feature Lead:**
-   * Microclimate physics model in Python, response to commands, stress-test generator, savings calculation.
+4. **Simulator & Energy Feature Lead (infinity889):**
+   * Microclimate physics model in Python, response to commands (<5s SLA), stress-test generator (M8), KZT tariff savings calculation.

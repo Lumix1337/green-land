@@ -47,3 +47,6 @@ migrate_working_dir/
 # Local agents and metadata
 .agents/
 .metadata
+__pycache__/
+.venv/
+*.pyo
