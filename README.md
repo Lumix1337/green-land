@@ -15,7 +15,7 @@
 | :--- | :--- | :--- |
 | **Mobile UI & Design Lead** | **Lumix** (`olzagula@gmail.com`) | Архитектура интерфейса (5 экранов), GreenLand Design System, верстка M2 (Дашборд), M7 (Настройки), M8 (Отказоустойчивость), адаптивность, двуязычная локализация (RU/KZ). |
 | **Mobile Logic Lead** | **KOLYA184** (`nkatkalov605@gmail.com`) | Реактивное состояние (Provider + Controllers), Supabase SDK & Auth (M1), Realtime телеметрия (M2), команды приводов с таймингом < 5с (M3), алерты (M5), fl_chart графики 24ч/7д (M6), отказоустойчивость M8. |
-| **Backend & Cloud Lead** | *Участник 3* | Архитектура PostgreSQL в Supabase, Row Level Security (RLS изоляция данных), Realtime публикации, движок правил автоматики M4. |
+| **Backend & Cloud Lead** | **Void** (`rasulorazahaj@gmail.com`) | Архитектура PostgreSQL в Supabase, Row Level Security (RLS изоляция данных), Realtime публикации, движок правил автоматики M4. |
 | **Simulator & Feature Lead**| **infinity889** (`kabijan.nurbol@gmail.com`) | Физическая климатическая модель на Python, реакция на команды ($<5$ с), генератор стресс-тестов M8, расчет экономии в тенге (`EnergyOptimizerService` & `EnergyTariffCalculator`). |
 
 ---
