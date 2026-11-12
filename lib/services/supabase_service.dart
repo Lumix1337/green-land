@@ -42,6 +42,17 @@ class SupabaseService {
     final supabaseUrl = url ?? defaultUrl;
     final supabaseKey = anonKey ?? defaultAnonKey;
 
+    final isPlaceholder = supabaseUrl.contains('greenland-smart-greenhouse.supabase.co') ||
+        supabaseKey.contains('mock_signature');
+
+    if (forceMock || isPlaceholder) {
+      _isMockMode = true;
+      _isInitialized = true;
+      _connectivityStream.add(true);
+      debugPrint('🌿 [SupabaseService] Initialized in Mock / Offline Resilience Mode (placeholder config)');
+      return true;
+    }
+
     final result = await ErrorHandlerService().safeRun<bool>(() async {
       await Supabase.initialize(
         url: supabaseUrl,

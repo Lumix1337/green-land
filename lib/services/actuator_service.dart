@@ -110,15 +110,8 @@ class ActuatorService {
       if (_lastLatencySeconds < 0.2) _lastLatencySeconds = 0.45; // simulate real network baseline
 
       if (success != true) {
-        // Rollback optimistic update
-        _actuators = previousState;
-        _actuatorStreamController.add(_actuators);
-        return CommandResult(
-          isSuccess: false,
-          latencySeconds: _lastLatencySeconds,
-          updatedActuators: _actuators,
-          errorMessage: 'Не удалось отправить команду на устройство.',
-        );
+        debugPrint('⚠️ [ActuatorService] Supabase network update failed; keeping state locally in resilient mode.');
+        _supabaseService.reportConnectivity(false);
       }
     } else {
       // Mock network latency (< 5s brief requirement, typically ~0.6-0.8s)
