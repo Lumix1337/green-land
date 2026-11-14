@@ -29,8 +29,8 @@ class GreenhouseProvider extends ChangeNotifier {
   StreamSubscription<List<AlertModel>>? _alertsSub;
   StreamSubscription<bool>? _stalenessSub;
 
-  AppLanguage _language = AppLanguage.ru;
-  bool _isLoggedIn = true;
+  AppLanguage _language = AppLanguage.en;
+  bool _isLoggedIn = false;
   bool _isOffline = false;
   String _userEmail = 'erlan.agrotech@gmail.com';
 
@@ -78,7 +78,8 @@ class GreenhouseProvider extends ChangeNotifier {
         _telemetryService = telemetryService ?? TelemetryService(),
         _actuatorService = actuatorService ?? ActuatorService(),
         _alertService = alertService ?? AlertService(),
-        _energyOptimizerService = energyOptimizerService ?? EnergyOptimizerService() {
+        _energyOptimizerService =
+            energyOptimizerService ?? EnergyOptimizerService() {
     _initServiceSubscriptions();
     _startLiveTicker();
   }
@@ -104,7 +105,15 @@ class GreenhouseProvider extends ChangeNotifier {
 
     _alertsSub = _alertService.onAlertsChanged.listen((alerts) {
       _hasActiveAlert = alerts.isNotEmpty;
-      _alertMessage = alerts.isNotEmpty ? alerts.first.title : null;
+      _alertMessage = alerts.isEmpty
+          ? null
+          : switch (alerts.first.type) {
+              AlertType.overheat => l10n.tr('alert_overheat_title'),
+              AlertType.drought => l10n.tr('low_soil_moisture'),
+              AlertType.criticalDrought => l10n.tr('chip_drought'),
+              AlertType.offline => l10n.tr('offline_banner_title'),
+              _ => alerts.first.title,
+            };
       notifyListeners();
     });
 
@@ -168,7 +177,8 @@ class GreenhouseProvider extends ChangeNotifier {
     // Apply immediate physical feedback simulation to microclimate
     switch (name) {
       case 'irrigation':
-        _actuators = _actuators.copyWith(irrigation: value, updatedAt: DateTime.now());
+        _actuators =
+            _actuators.copyWith(irrigation: value, updatedAt: DateTime.now());
         if (value) {
           _telemetry = TelemetryModel(
             airTemp: _telemetry.airTemp,
@@ -180,7 +190,8 @@ class GreenhouseProvider extends ChangeNotifier {
         }
         break;
       case 'ventilation':
-        _actuators = _actuators.copyWith(ventilation: value, updatedAt: DateTime.now());
+        _actuators =
+            _actuators.copyWith(ventilation: value, updatedAt: DateTime.now());
         if (value) {
           _telemetry = TelemetryModel(
             airTemp: max(16.0, _telemetry.airTemp - 2.8),
@@ -195,7 +206,8 @@ class GreenhouseProvider extends ChangeNotifier {
         }
         break;
       case 'heater':
-        _actuators = _actuators.copyWith(heater: value, updatedAt: DateTime.now());
+        _actuators =
+            _actuators.copyWith(heater: value, updatedAt: DateTime.now());
         if (value) {
           _telemetry = TelemetryModel(
             airTemp: min(35.0, _telemetry.airTemp + 3.0),
@@ -207,7 +219,8 @@ class GreenhouseProvider extends ChangeNotifier {
         }
         break;
       case 'lighting':
-        _actuators = _actuators.copyWith(lighting: value, updatedAt: DateTime.now());
+        _actuators =
+            _actuators.copyWith(lighting: value, updatedAt: DateTime.now());
         if (value) {
           _telemetry = TelemetryModel(
             airTemp: _telemetry.airTemp,
@@ -220,8 +233,10 @@ class GreenhouseProvider extends ChangeNotifier {
         break;
     }
 
-    _commandLatencySeconds = DateTime.now().difference(startTime).inMilliseconds / 1000.0 + 0.45;
-    if (_commandLatencySeconds > 4.9) _commandLatencySeconds = 4.8; // strict < 5s limit
+    _commandLatencySeconds =
+        DateTime.now().difference(startTime).inMilliseconds / 1000.0 + 0.45;
+    if (_commandLatencySeconds > 4.9)
+      _commandLatencySeconds = 4.8; // strict < 5s limit
     _telemetryService.setTelemetry(_telemetry);
     notifyListeners();
   }
@@ -276,10 +291,13 @@ class GreenhouseProvider extends ChangeNotifier {
 
       double newTemp = (_telemetry.airTemp + tempDelta).clamp(14.0, 38.0);
       double newSoil = (_telemetry.soilMoisture + soilDelta).clamp(15.0, 95.0);
-      double newHumidity = (_telemetry.airHumidity + humidityDelta).clamp(30.0, 95.0);
+      double newHumidity =
+          (_telemetry.airHumidity + humidityDelta).clamp(30.0, 95.0);
 
       // M4: Auto mode rule test
-      if (_settings.autoMode && newSoil < _settings.minSoilMoisture && !_actuators.irrigation) {
+      if (_settings.autoMode &&
+          newSoil < _settings.minSoilMoisture &&
+          !_actuators.irrigation) {
         _actuators = _actuators.copyWith(irrigation: true);
         _actuatorService.setActuatorState(name: 'irrigation', value: true);
       }

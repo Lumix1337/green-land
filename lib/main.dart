@@ -25,7 +25,8 @@ Future<void> main() async {
   try {
     await SupabaseService().initialize();
   } catch (e) {
-    debugPrint('🛡️ [SupabaseService] Initialized in resilient offline mode: $e');
+    debugPrint(
+        '🛡️ [SupabaseService] Initialized in resilient offline mode: $e');
   }
 
   runApp(
@@ -51,7 +52,7 @@ class GreenLandApp extends StatefulWidget {
 }
 
 class _GreenLandAppState extends State<GreenLandApp> {
-  bool _isAuthenticated = true; // Set to true by default for fast demo evaluation
+  bool _isAuthenticated = false;
 
   @override
   Widget build(BuildContext context) {
@@ -85,10 +86,11 @@ class _GreenLandAppState extends State<GreenLandApp> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    Icon(Icons.shield_rounded, color: AppTheme.primary, size: 48),
+                    Icon(Icons.shield_rounded,
+                        color: AppTheme.primary, size: 48),
                     SizedBox(height: 16),
                     Text(
-                      'GreenLand: Защищенный режим',
+                      'GreenLand: Safe mode',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -97,9 +99,10 @@ class _GreenLandAppState extends State<GreenLandApp> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Произошла временная ошибка отрисовки. Приложение стабильно.',
+                      'The screen could not be displayed.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                      style: TextStyle(
+                          fontSize: 12, color: AppTheme.textSecondary),
                     ),
                   ],
                 ),

@@ -5,17 +5,19 @@ import 'package:flutter/material.dart';
 /// Deep forest greens, organic curved cards, clear status indicators.
 class AppTheme {
   // Brand Color Palette
-  static const Color primaryDark = Color(0xFF1B5E20);      // Deep Forest Green
-  static const Color primary = Color(0xFF2E7D32);          // Emerald Green
-  static const Color primaryLight = Color(0xFF4CAF50);     // Leaf Green
-  static const Color accentMint = Color(0xFF81C784);       // Soft Mint
-  static const Color surfaceLight = Color(0xFFF4F8F4);     // Organic Soft Background
-  
+  static const Color primaryDark = Color(0xFF1B5E20); // Deep Forest Green
+  static const Color primary = Color(0xFF2E7D32); // Emerald Green
+  static const Color primaryLight = Color(0xFF4CAF50); // Leaf Green
+  static const Color accentMint = Color(0xFF81C784); // Soft Mint
+  static const Color surfaceLight =
+      Color(0xFFF4F8F4); // Organic Soft Background
+
   // Status Colors
-  static const Color statusSuccess = Color(0xFF2E7D32);    // Healthy / OK
-  static const Color statusWarning = Color(0xFFF57C00);    // Warning / Caution
-  static const Color statusDanger = Color(0xFFD32F2F);     // Alert / Critical
-  static const Color statusOffline = Color(0xFF616161);    // Offline / Disconnected
+  static const Color statusSuccess = Color(0xFF2E7D32); // Healthy / OK
+  static const Color statusWarning = Color(0xFFF57C00); // Warning / Caution
+  static const Color statusDanger = Color(0xFFD32F2F); // Alert / Critical
+  static const Color statusOffline =
+      Color(0xFF616161); // Offline / Disconnected
 
   // Typography & Neutral Colors
   static const Color textPrimary = Color(0xFF142416);
@@ -42,12 +44,14 @@ class AppTheme {
         onSurface: textPrimary,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: primaryDark,
+        foregroundColor: Colors.white,
+        toolbarHeight: 66,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: primaryDark),
+        iconTheme: IconThemeData(color: Colors.white),
         titleTextStyle: TextStyle(
-          color: primaryDark,
+          color: Colors.white,
           fontSize: 22,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.5,
@@ -80,7 +84,8 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: dividerColor),

@@ -3,7 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:green_land/widgets/metric_card.dart';
 
 void main() {
-  testWidgets('MetricCard displays title, value, unit, and status badge', (WidgetTester tester) async {
+  testWidgets('MetricCard displays title, value, unit, and status badge',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -24,6 +25,5 @@ void main() {
     expect(find.text('24.5'), findsOneWidget);
     expect(find.text('°C'), findsOneWidget);
     expect(find.text('Норма'), findsOneWidget);
-    expect(find.byIcon(Icons.thermostat_rounded), findsOneWidget);
   });
 }

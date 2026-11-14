@@ -32,10 +32,9 @@ class SettingsScreen extends StatelessWidget {
                 monthlySavedTenge: settings.monthlySavedTenge,
                 dayTariff: settings.dayTariffKzt,
                 nightTariff: settings.nightTariffKzt,
-                title: l10n.tr('signature_feature_title'),
-                subtitle: l10n.tr('energy_saved_month'),
-                dayTariffLabel: l10n.tr('day_tariff_badge'),
-                nightTariffLabel: l10n.tr('night_tariff_badge'),
+                title: l10n.tr('monthly_energy_savings'),
+                dayTariffLabel: l10n.tr('day_short'),
+                nightTariffLabel: l10n.tr('night_short'),
               ),
 
               const SizedBox(height: 24),
@@ -54,7 +53,7 @@ class SettingsScreen extends StatelessWidget {
                       radius: 26,
                       backgroundColor: AppTheme.primary.withOpacity(0.15),
                       child: const Text(
-                        'Е',
+                        'E',
                         style: TextStyle(
                           color: AppTheme.primaryDark,
                           fontSize: 22,
@@ -67,8 +66,8 @@ class SettingsScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Ерлан (Владелец теплицы)',
+                          Text(
+                            l10n.tr('profile_owner'),
                             style: TextStyle(
                               color: AppTheme.textPrimary,
                               fontSize: 15,
@@ -84,8 +83,8 @@ class SettingsScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            '800 м² • Тепличные томаты',
+                          Text(
+                            l10n.tr('profile_greenhouse'),
                             style: TextStyle(
                               color: AppTheme.primary,
                               fontSize: 11,
@@ -109,37 +108,34 @@ class SettingsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: AppTheme.dividerColor),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.translate_rounded, color: AppTheme.primary, size: 22),
-                        const SizedBox(width: 12),
-                        Text(
-                          l10n.tr('lang_selector_title'),
-                          style: const TextStyle(
-                            color: AppTheme.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                    Text(l10n.tr('lang_selector_title'),
+                        style: const TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SegmentedButton<AppLanguage>(
+                        segments: const [
+                          ButtonSegment(
+                              value: AppLanguage.en, label: Text('English')),
+                          ButtonSegment(
+                              value: AppLanguage.ru, label: Text('Russian')),
+                          ButtonSegment(
+                              value: AppLanguage.kz, label: Text('Kazakh')),
+                        ],
+                        selected: {provider.language},
+                        onSelectionChanged: (Set<AppLanguage> newSelection) {
+                          provider.switchLanguage(newSelection.first);
+                        },
+                        style: ButtonStyle(
+                          visualDensity: VisualDensity.compact,
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
-                        ),
-                      ],
-                    ),
-                    SegmentedButton<AppLanguage>(
-                      segments: const [
-                        ButtonSegment(value: AppLanguage.ru, label: Text('РУС')),
-                        ButtonSegment(value: AppLanguage.kz, label: Text('ҚАЗ')),
-                        ButtonSegment(value: AppLanguage.en, label: Text('ENG')),
-                      ],
-                      selected: {provider.language},
-                      onSelectionChanged: (Set<AppLanguage> newSelection) {
-                        provider.switchLanguage(newSelection.first);
-                      },
-                      style: ButtonStyle(
-                        visualDensity: VisualDensity.compact,
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                       ),
                     ),
@@ -270,7 +266,8 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.bug_report_rounded, color: Color(0xFFF57F17), size: 24),
+                    const Icon(Icons.bug_report_rounded,
+                        color: Color(0xFFF57F17), size: 24),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
@@ -285,8 +282,8 @@ class SettingsScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          const Text(
-                            'Для демонстрации стресс-теста комиссии',
+                          Text(
+                            l10n.tr('cached_readings'),
                             style: TextStyle(
                               color: Color(0xFF8D6E63),
                               fontSize: 11,
@@ -317,7 +314,8 @@ class SettingsScreen extends StatelessWidget {
                   provider.logout();
                   onLogout();
                 },
-                icon: const Icon(Icons.logout_rounded, color: AppTheme.statusDanger),
+                icon: const Icon(Icons.logout_rounded,
+                    color: AppTheme.statusDanger),
                 label: Text(l10n.tr('btn_logout')),
               ),
 

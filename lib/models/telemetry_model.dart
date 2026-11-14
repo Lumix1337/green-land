@@ -3,10 +3,10 @@ import '../l10n/app_localizations.dart';
 class TelemetryModel {
   final String? id;
   final String? greenhouseId;
-  final double airTemp;        // °C
-  final double airHumidity;    // %
-  final double soilMoisture;   // %
-  final double lightLevel;     // Lux
+  final double airTemp; // °C
+  final double airHumidity; // %
+  final double soilMoisture; // %
+  final double lightLevel; // Lux
   final DateTime timestamp;
 
   const TelemetryModel({
@@ -49,44 +49,58 @@ class TelemetryModel {
     );
   }
 
-  String getTimeAgo([AppLanguage language = AppLanguage.ru]) {
+  String getTimeAgo([AppLanguage language = AppLanguage.en]) {
     final diff = DateTime.now().difference(timestamp);
     if (diff.inSeconds < 10) {
       switch (language) {
-        case AppLanguage.kz: return 'жаңа ғана';
-        case AppLanguage.en: return 'just now';
-        case AppLanguage.ru: return 'только что';
+        case AppLanguage.kz:
+          return 'жаңа ғана';
+        case AppLanguage.en:
+          return 'just now';
+        case AppLanguage.ru:
+          return 'только что';
       }
     }
     if (diff.inSeconds < 60) {
       switch (language) {
-        case AppLanguage.kz: return '${diff.inSeconds} сек. бұрын';
-        case AppLanguage.en: return '${diff.inSeconds}s ago';
-        case AppLanguage.ru: return '${diff.inSeconds} сек. назад';
+        case AppLanguage.kz:
+          return '${diff.inSeconds} сек. бұрын';
+        case AppLanguage.en:
+          return '${diff.inSeconds}s ago';
+        case AppLanguage.ru:
+          return '${diff.inSeconds} сек. назад';
       }
     }
     if (diff.inMinutes < 60) {
       switch (language) {
-        case AppLanguage.kz: return '${diff.inMinutes} мин. бұрын';
-        case AppLanguage.en: return '${diff.inMinutes}m ago';
-        case AppLanguage.ru: return '${diff.inMinutes} мин. назад';
+        case AppLanguage.kz:
+          return '${diff.inMinutes} мин. бұрын';
+        case AppLanguage.en:
+          return '${diff.inMinutes}m ago';
+        case AppLanguage.ru:
+          return '${diff.inMinutes} мин. назад';
       }
     }
     switch (language) {
-      case AppLanguage.kz: return '${diff.inHours} сағ. бұрын';
-      case AppLanguage.en: return '${diff.inHours}h ago';
-      case AppLanguage.ru: return '${diff.inHours} ч. назад';
+      case AppLanguage.kz:
+        return '${diff.inHours} сағ. бұрын';
+      case AppLanguage.en:
+        return '${diff.inHours}h ago';
+      case AppLanguage.ru:
+        return '${diff.inHours} ч. назад';
     }
   }
 
-  String get timeAgo => getTimeAgo(AppLanguage.ru);
+  String get timeAgo => getTimeAgo();
 
   factory TelemetryModel.fromJson(Map<String, dynamic> json) {
     DateTime parsedTimestamp = DateTime.now();
     if (json['timestamp'] != null) {
-      parsedTimestamp = DateTime.tryParse(json['timestamp'].toString()) ?? DateTime.now();
+      parsedTimestamp =
+          DateTime.tryParse(json['timestamp'].toString()) ?? DateTime.now();
     } else if (json['created_at'] != null) {
-      parsedTimestamp = DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now();
+      parsedTimestamp =
+          DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now();
     }
 
     return TelemetryModel(

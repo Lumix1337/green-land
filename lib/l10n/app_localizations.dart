@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-
-enum AppLanguage { ru, kz, en }
+enum AppLanguage { en, ru, kz }
 
 class AppLocalizations {
   final AppLanguage language;
@@ -51,12 +49,12 @@ class AppLocalizations {
     'login_subtitle': {
       AppLanguage.ru: 'Управление микроклиматом и энергосбережением',
       AppLanguage.kz: 'Микроклимат пен энергияны үнемдеуді басқару',
-      AppLanguage.en: 'Microclimate & Energy Optimization Management',
+      AppLanguage.en: 'Greenhouse climate and energy management',
     },
     'email_label': {
       AppLanguage.ru: 'Email / Логин',
       AppLanguage.kz: 'Email / Логин',
-      AppLanguage.en: 'Email / Username',
+      AppLanguage.en: 'Email',
     },
     'password_label': {
       AppLanguage.ru: 'Пароль',
@@ -66,24 +64,24 @@ class AppLocalizations {
     'login_btn': {
       AppLanguage.ru: 'Войти в теплицу',
       AppLanguage.kz: 'Жылыжайға кіру',
-      AppLanguage.en: 'Access Greenhouse',
+      AppLanguage.en: 'Sign in',
     },
     'quick_demo_login': {
       AppLanguage.ru: 'Демо-вход (Фермер Ерлан)',
       AppLanguage.kz: 'Демо-кіру (Ерлан фермер)',
-      AppLanguage.en: 'Demo Login (Farmer Erlan)',
+      AppLanguage.en: 'Try demo as Erlan',
     },
 
     // Dashboard Screen (M2)
     'greenhouse_title': {
       AppLanguage.ru: 'Теплица №1 (Томаты)',
       AppLanguage.kz: '№1 Жылыжай (Қызанақ)',
-      AppLanguage.en: 'Greenhouse #1 (Tomatoes)',
+      AppLanguage.en: 'Greenhouse 1 · Tomatoes',
     },
     'status_all_good': {
       AppLanguage.ru: 'Все параметры в норме',
       AppLanguage.kz: 'Барлық көрсеткіштер қалыпты',
-      AppLanguage.en: 'All Parameters Optimal',
+      AppLanguage.en: 'All readings in range',
     },
     'status_warning': {
       AppLanguage.ru: 'Внимание: отклонение нормы',
@@ -103,22 +101,22 @@ class AppLocalizations {
     'param_air_temp': {
       AppLanguage.ru: 'Температура воздуха',
       AppLanguage.kz: 'Ауа температурасы',
-      AppLanguage.en: 'Air Temperature',
+      AppLanguage.en: 'Air temperature',
     },
     'param_air_humidity': {
       AppLanguage.ru: 'Влажность воздуха',
       AppLanguage.kz: 'Ауа ылғалдылығы',
-      AppLanguage.en: 'Air Humidity',
+      AppLanguage.en: 'Air humidity',
     },
     'param_soil_moisture': {
       AppLanguage.ru: 'Влажность почвы',
       AppLanguage.kz: 'Топырақ ылғалдылығы',
-      AppLanguage.en: 'Soil Moisture',
+      AppLanguage.en: 'Soil moisture',
     },
     'param_light_level': {
       AppLanguage.ru: 'Освещенность',
       AppLanguage.kz: 'Жарық деңгейі',
-      AppLanguage.en: 'Light Level',
+      AppLanguage.en: 'Light level',
     },
 
     // Status Chips (M2)
@@ -157,84 +155,84 @@ class AppLocalizations {
     'control_title': {
       AppLanguage.ru: 'Управление оборудованием',
       AppLanguage.kz: 'Құрылғыларды басқару',
-      AppLanguage.en: 'Equipment Remote Control',
+      AppLanguage.en: 'Equipment controls',
     },
     'actuator_irrigation': {
       AppLanguage.ru: 'Капельный полив',
       AppLanguage.kz: 'Тамшылатып суару',
-      AppLanguage.en: 'Drip Irrigation',
+      AppLanguage.en: 'Drip irrigation',
     },
     'actuator_irrigation_desc': {
       AppLanguage.ru: 'Включение насоса орошения грядок',
       AppLanguage.kz: 'Жүйектерді суару сорғысын қосу',
-      AppLanguage.en: 'Bed irrigation pump activation',
+      AppLanguage.en: 'Water pump for plant beds',
     },
     'actuator_ventilation': {
       AppLanguage.ru: 'Вентиляция (Фрамуги)',
       AppLanguage.kz: 'Желдету (Желкөздер)',
-      AppLanguage.en: 'Ventilation (Transoms)',
+      AppLanguage.en: 'Ventilation',
     },
     'actuator_ventilation_desc': {
       AppLanguage.ru: 'Сервопривод окон для охлаждения',
       AppLanguage.kz: 'Салқындатуға арналған терезе жетегі',
-      AppLanguage.en: 'Window servo actuator for cooling',
+      AppLanguage.en: 'Opens vents to cool the greenhouse',
     },
     'actuator_heater': {
       AppLanguage.ru: 'Отопление (Тепловентилятор)',
       AppLanguage.kz: 'Жылыту (Жылу желдеткіші)',
-      AppLanguage.en: 'Heating (Fan Heater)',
+      AppLanguage.en: 'Heating',
     },
     'actuator_heater_desc': {
       AppLanguage.ru: 'Поддержание ночной температуры',
       AppLanguage.kz: 'Түнгі температураны ұстап тұру',
-      AppLanguage.en: 'Maintain nocturnal temperature',
+      AppLanguage.en: 'Greenhouse heater',
     },
     'actuator_lighting': {
       AppLanguage.ru: 'Фитоосвещение',
       AppLanguage.kz: 'Фитожарықтандыру',
-      AppLanguage.en: 'Grow Lighting',
+      AppLanguage.en: 'Grow lights',
     },
     'actuator_lighting_desc': {
       AppLanguage.ru: 'Досвечивание в ночной льготный тариф',
       AppLanguage.kz: 'Түнгі жеңілдікті тарифте қосымша жарық',
-      AppLanguage.en: 'Off-peak tariff supplemental lighting',
+      AppLanguage.en: 'Supplemental lighting for crops',
     },
     'state_active': {
       AppLanguage.ru: 'АКТИВНО',
       AppLanguage.kz: 'ҚОСУЛЫ',
-      AppLanguage.en: 'ACTIVE',
+      AppLanguage.en: 'On',
     },
     'state_inactive': {
       AppLanguage.ru: 'ВЫКЛЮЧЕНО',
       AppLanguage.kz: 'ӨШІРУЛІ',
-      AppLanguage.en: 'OFF',
+      AppLanguage.en: 'Off',
     },
     'latency_indicator': {
-      AppLanguage.ru: 'Отклик прибора: 0.8 сек (< 5 сек)',
-      AppLanguage.kz: 'Құрылғы жауабы: 0.8 сек (< 5 сек)',
-      AppLanguage.en: 'Device Latency: 0.8s (< 5s)',
+      AppLanguage.en: 'Response time',
+      AppLanguage.ru: 'Время отклика',
+      AppLanguage.kz: 'Жауап беру уақыты',
     },
     'btn_turn_all_off': {
       AppLanguage.ru: 'Выключить все приборы',
       AppLanguage.kz: 'Барлық құрылғыларды өшіру',
-      AppLanguage.en: 'Turn Off All Devices',
+      AppLanguage.en: 'Turn off all devices',
     },
 
     // Operating Modes (M4)
     'mode_auto': {
       AppLanguage.ru: 'Автоматический режим',
       AppLanguage.kz: 'Автоматты режим',
-      AppLanguage.en: 'Automatic Mode',
+      AppLanguage.en: 'Automatic mode',
     },
     'mode_manual': {
       AppLanguage.ru: 'Ручной режим',
       AppLanguage.kz: 'Қолмен басқару',
-      AppLanguage.en: 'Manual Mode',
+      AppLanguage.en: 'Manual mode',
     },
     'auto_rule_active': {
       AppLanguage.ru: 'Автоматика активна: полив при почве < 30%',
       AppLanguage.kz: 'Автоматика қосулы: топырақ < 30% болса суарады',
-      AppLanguage.en: 'Auto rule active: water when soil < 30%',
+      AppLanguage.en: 'Irrigation and ventilation rules are active',
     },
 
     // Alerts (M5)
@@ -244,36 +242,39 @@ class AppLocalizations {
       AppLanguage.en: 'Warning: Overheating!',
     },
     'alert_overheat_body': {
-      AppLanguage.ru: 'Температура 32.5°C превысила порог. Рекомендуется открыть вентиляцию.',
-      AppLanguage.kz: 'Температура 32.5°C шектен асты. Желдетуді ашу ұсынылады.',
-      AppLanguage.en: 'Temperature 32.5°C exceeded limit. Open ventilation to cool down.',
+      AppLanguage.ru:
+          'Температура 32.5°C превысила порог. Рекомендуется открыть вентиляцию.',
+      AppLanguage.kz:
+          'Температура 32.5°C шектен асты. Желдетуді ашу ұсынылады.',
+      AppLanguage.en:
+          'Temperature 32.5°C exceeded limit. Open ventilation to cool down.',
     },
 
     // Analytics & History (M6)
     'analytics_title': {
       AppLanguage.ru: 'История и Графики (7 дней)',
       AppLanguage.kz: 'Тарих және Графиктер (7 күн)',
-      AppLanguage.en: 'History & Charts (7 Days)',
+      AppLanguage.en: 'History and charts',
     },
     'period_24h': {
       AppLanguage.ru: '24 часа',
       AppLanguage.kz: '24 сағат',
-      AppLanguage.en: '24 Hours',
+      AppLanguage.en: '24 hours',
     },
     'period_7d': {
       AppLanguage.ru: '7 дней',
       AppLanguage.kz: '7 күн',
-      AppLanguage.en: '7 Days',
+      AppLanguage.en: '7 days',
     },
     'chart_soil_title': {
       AppLanguage.ru: 'Динамика влажности почвы (%)',
       AppLanguage.kz: 'Топырақ ылғалдылығының динамикасы (%)',
-      AppLanguage.en: 'Soil Moisture Dynamics (%)',
+      AppLanguage.en: 'Soil moisture, %',
     },
     'chart_temp_title': {
       AppLanguage.ru: 'Температура воздуха (°C)',
       AppLanguage.kz: 'Ауа температурасы (°C)',
-      AppLanguage.en: 'Air Temperature (°C)',
+      AppLanguage.en: 'Air temperature, °C',
     },
     'water_deficit_event': {
       AppLanguage.ru: 'Обнаружен дефицит влаги: Вт, 14:00 (22%)',
@@ -285,7 +286,7 @@ class AppLocalizations {
     'settings_title': {
       AppLanguage.ru: 'Настройки и Тарифы',
       AppLanguage.kz: 'Баптаулар мен Тарифтер',
-      AppLanguage.en: 'Settings & Tariffs',
+      AppLanguage.en: 'Settings and tariffs',
     },
     'signature_feature_title': {
       AppLanguage.ru: 'Оптимизатор затрат энергии (тенге)',
@@ -310,39 +311,41 @@ class AppLocalizations {
     'thresholds_header': {
       AppLanguage.ru: 'Пороговые значения автоматики',
       AppLanguage.kz: 'Автоматиканың шекті мәндері',
-      AppLanguage.en: 'Automation Threshold Limits',
+      AppLanguage.en: 'Automation thresholds',
     },
     'min_soil_threshold': {
       AppLanguage.ru: 'Мин. влажность почвы (старт полива)',
       AppLanguage.kz: 'Мин. топырақ ылғалдылығы (суаруды бастау)',
-      AppLanguage.en: 'Min soil moisture (start irrigation)',
+      AppLanguage.en: 'Min. soil moisture',
     },
     'max_temp_threshold': {
       AppLanguage.ru: 'Макс. температура (старт вентиляции)',
       AppLanguage.kz: 'Макс. температура (желдетуді бастау)',
-      AppLanguage.en: 'Max air temp (open ventilation)',
+      AppLanguage.en: 'Max. temperature',
     },
     'lang_selector_title': {
       AppLanguage.ru: 'Тіл / Язык / Language',
       AppLanguage.kz: 'Тіл / Язык / Language',
-      AppLanguage.en: 'Language / Тіл / Язык',
+      AppLanguage.en: 'Interface language',
     },
     'btn_logout': {
       AppLanguage.ru: 'Выйти из системы',
       AppLanguage.kz: 'Жүйеден шығу',
-      AppLanguage.en: 'Log Out of System',
+      AppLanguage.en: 'Sign out',
     },
 
     // Failure Handling (M8)
     'offline_banner_title': {
       AppLanguage.ru: 'Нет связи с теплицей',
       AppLanguage.kz: 'Жылыжаймен байланыс жоқ',
-      AppLanguage.en: 'No Connection to Greenhouse',
+      AppLanguage.en: 'Connection lost',
     },
     'offline_banner_desc': {
-      AppLanguage.ru: 'Симулятор отключен. Показаны кэшированные данные. Приложение работает стабильно.',
-      AppLanguage.kz: 'Симулятор өшірулі. Соңғы сақталған деректер көрсетілген. Қосымша тұрақты жұмыс істеп тұр.',
-      AppLanguage.en: 'Simulator disconnected. Displaying cached readings. App operates normally.',
+      AppLanguage.ru:
+          'Симулятор отключен. Показаны кэшированные данные. Приложение работает стабильно.',
+      AppLanguage.kz:
+          'Симулятор өшірулі. Соңғы сақталған деректер көрсетілген. Қосымша тұрақты жұмыс істеп тұр.',
+      AppLanguage.en: 'Showing the last saved readings.',
     },
     'btn_retry': {
       AppLanguage.ru: 'Повторить подключение',
@@ -352,22 +355,92 @@ class AppLocalizations {
     'test_offline_mode': {
       AppLanguage.ru: 'Симуляция обрыва связи (Стресс-тест M8)',
       AppLanguage.kz: 'Байланыс үзілуін тексеру (M8 стресс-тест)',
-      AppLanguage.en: 'Simulate Link Disconnect (M8 Stress-Test)',
+      AppLanguage.en: 'Simulate connection loss',
     },
     'scenario2_overheat': {
       AppLanguage.ru: 'Сценарий 2: Перегрев',
       AppLanguage.kz: '2-сценарий: Қызып кету',
-      AppLanguage.en: 'Scenario 2: Overheat',
+      AppLanguage.en: 'Simulate overheating',
     },
     'restore_connection': {
       AppLanguage.ru: 'Восстановить связь',
       AppLanguage.kz: 'Байланысты қалпына келтіру',
-      AppLanguage.en: 'Restore Connection',
+      AppLanguage.en: 'Restore connection',
     },
     'stress_test_action': {
       AppLanguage.ru: 'Стресс-тест M8 (Офлайн)',
       AppLanguage.kz: 'M8 стресс-тест (Офлайн)',
       AppLanguage.en: 'M8 Stress-Test (Offline)',
+    },
+    'open_controls': {
+      AppLanguage.en: 'Open ventilation controls',
+      AppLanguage.ru: 'Открыть управление вентиляцией',
+      AppLanguage.kz: 'Желдетуді басқаруды ашу',
+    },
+    'equipment_online': {
+      AppLanguage.en: 'Equipment online',
+      AppLanguage.ru: 'Оборудование на связи',
+      AppLanguage.kz: 'Жабдық байланыста',
+    },
+    'monthly_energy_savings': {
+      AppLanguage.en: 'Monthly energy savings',
+      AppLanguage.ru: 'Экономия за месяц',
+      AppLanguage.kz: 'Айлық энергия үнемі',
+    },
+    'day_short': {
+      AppLanguage.en: 'Day',
+      AppLanguage.ru: 'День',
+      AppLanguage.kz: 'Күндіз',
+    },
+    'night_short': {
+      AppLanguage.en: 'Night',
+      AppLanguage.ru: 'Ночь',
+      AppLanguage.kz: 'Түнде',
+    },
+    'profile_owner': {
+      AppLanguage.en: 'Erlan · Greenhouse owner',
+      AppLanguage.ru: 'Ерлан · Владелец теплицы',
+      AppLanguage.kz: 'Ерлан · Жылыжай иесі',
+    },
+    'profile_greenhouse': {
+      AppLanguage.en: '800 m² · Greenhouse tomatoes',
+      AppLanguage.ru: '800 м² · Тепличные томаты',
+      AppLanguage.kz: '800 м² · Жылыжай қызанағы',
+    },
+    'cached_readings': {
+      AppLanguage.en: 'View cached readings',
+      AppLanguage.ru: 'Показать сохранённые данные',
+      AppLanguage.kz: 'Сақталған деректерді көру',
+    },
+    'weekdays_short': {
+      AppLanguage.en: 'Mon Tue Wed Thu Fri Sat Sun',
+      AppLanguage.ru: 'Пн Вт Ср Чт Пт Сб Вс',
+      AppLanguage.kz: 'Дс Сс Ср Бс Жм Сб Жс',
+    },
+    'show_bars': {
+      AppLanguage.en: 'Show bars',
+      AppLanguage.ru: 'Показать столбцы',
+      AppLanguage.kz: 'Бағандарды көрсету',
+    },
+    'show_lines': {
+      AppLanguage.en: 'Show lines',
+      AppLanguage.ru: 'Показать линии',
+      AppLanguage.kz: 'Сызықтарды көрсету',
+    },
+    'low_soil_moisture': {
+      AppLanguage.en: 'Low soil moisture',
+      AppLanguage.ru: 'Низкая влажность почвы',
+      AppLanguage.kz: 'Топырақ ылғалы төмен',
+    },
+    'drought_threshold': {
+      AppLanguage.en: 'Dry soil threshold',
+      AppLanguage.ru: 'Порог засухи',
+      AppLanguage.kz: 'Құрғақ топырақ шегі',
+    },
+    'heat_threshold': {
+      AppLanguage.en: 'Overheating threshold',
+      AppLanguage.ru: 'Порог перегрева',
+      AppLanguage.kz: 'Қызып кету шегі',
     },
   };
 

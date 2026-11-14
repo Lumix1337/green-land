@@ -24,9 +24,9 @@ void main() {
 
       expect(l10n.tr('app_name'), equals('GreenLand'));
       expect(l10n.tr('nav_dashboard'), equals('Dashboard'));
-      expect(l10n.tr('status_all_good'), equals('All Parameters Optimal'));
+      expect(l10n.tr('status_all_good'), equals('All readings in range'));
       expect(l10n.tr('chip_normal'), equals('Normal'));
-      expect(l10n.tr('btn_turn_all_off'), equals('Turn Off All Devices'));
+      expect(l10n.tr('btn_turn_all_off'), equals('Turn off all devices'));
     });
   });
 }

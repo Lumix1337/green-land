@@ -71,7 +71,8 @@ class AlertModel {
       type: AlertType.overheat,
       severity: AlertSeverity.danger,
       title: 'Опасный перегрев!',
-      message: 'Температура поднялась до ${currentTemp.toStringAsFixed(1)}°C (норма до ${threshold.toStringAsFixed(1)}°C). Риск увядания томатов.',
+      message:
+          'Температура поднялась до ${currentTemp.toStringAsFixed(1)}°C (норма до ${threshold.toStringAsFixed(1)}°C). Риск увядания томатов.',
       timestamp: DateTime.now(),
       actionLabel: actionLabel,
       actionKey: 'ventilation',
@@ -89,7 +90,8 @@ class AlertModel {
       type: isCritical ? AlertType.criticalDrought : AlertType.drought,
       severity: isCritical ? AlertSeverity.danger : AlertSeverity.warning,
       title: isCritical ? 'Критическая засуха!' : 'Низкая влажность почвы',
-      message: 'Влажность почвы упала до ${currentMoisture.toStringAsFixed(1)}% (критично < ${threshold.toStringAsFixed(1)}%). Требуется полив.',
+      message:
+          'Влажность почвы упала до ${currentMoisture.toStringAsFixed(1)}% (критично < ${threshold.toStringAsFixed(1)}%). Требуется полив.',
       timestamp: DateTime.now(),
       actionLabel: actionLabel,
       actionKey: 'irrigation',
@@ -97,7 +99,8 @@ class AlertModel {
   }
 
   factory AlertModel.offline({
-    String? message = 'Потеряна связь с симулятором теплицы. Показаны кэшированные данные.',
+    String? message =
+        'Потеряна связь с симулятором теплицы. Показаны кэшированные данные.',
   }) {
     return AlertModel(
       id: 'alert_offline_${DateTime.now().millisecondsSinceEpoch}',
@@ -113,7 +116,8 @@ class AlertModel {
 
   factory AlertModel.fromJson(Map<String, dynamic> json) {
     return AlertModel(
-      id: json['id'] as String? ?? 'alert_${DateTime.now().millisecondsSinceEpoch}',
+      id: json['id'] as String? ??
+          'alert_${DateTime.now().millisecondsSinceEpoch}',
       type: AlertType.values.firstWhere(
         (e) => e.name == json['type'],
         orElse: () => AlertType.custom,
@@ -129,7 +133,7 @@ class AlertModel {
           : DateTime.now(),
       isDismissed: json['is_dismissed'] as bool? ?? false,
       actionLabel: json['action_label'] as String?,
-      actionKey: json['action_key'] as String?,
+      actionKey: json['action_key'] as String? ?? json['actionKey'] as String?,
     );
   }
 
@@ -143,7 +147,7 @@ class AlertModel {
       'timestamp': timestamp.toIso8601String(),
       'is_dismissed': isDismissed,
       'action_label': actionLabel,
-      'actionKey': actionKey,
+      'action_key': actionKey,
     };
   }
 }

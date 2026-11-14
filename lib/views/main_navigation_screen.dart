@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/greenhouse_provider.dart';
-import '../theme/app_theme.dart';
 import 'dashboard_screen.dart';
 import 'control_screen.dart';
 import 'analytics_screen.dart';
@@ -25,7 +24,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final l10n = provider.l10n;
 
     final screens = [
-      const DashboardScreen(),
+      DashboardScreen(onOpenControls: () => setState(() => _currentIndex = 1)),
       const ControlScreen(),
       const AnalyticsScreen(),
       SettingsScreen(onLogout: widget.onLogout),
@@ -38,6 +37,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
+        height: 76,
+        backgroundColor: Colors.white,
+        indicatorColor: const Color(0xFFE8F5E9),
         onDestinationSelected: (index) {
           setState(() {
             _currentIndex = index;
@@ -45,23 +47,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         },
         destinations: [
           NavigationDestination(
-            icon: const Icon(Icons.dashboard_outlined),
-            selectedIcon: const Icon(Icons.dashboard_rounded, color: AppTheme.primary),
+            icon: Image.asset('assets/figma/dashboard.png',
+                width: 21, height: 21),
             label: l10n.tr('nav_dashboard'),
           ),
           NavigationDestination(
-            icon: const Icon(Icons.tune_outlined),
-            selectedIcon: const Icon(Icons.tune_rounded, color: AppTheme.primary),
+            icon:
+                Image.asset('assets/figma/controls.png', width: 21, height: 21),
             label: l10n.tr('nav_control'),
           ),
           NavigationDestination(
-            icon: const Icon(Icons.insights_outlined),
-            selectedIcon: const Icon(Icons.insights_rounded, color: AppTheme.primary),
+            icon: Image.asset('assets/figma/analytics.png',
+                width: 21, height: 21),
             label: l10n.tr('nav_analytics'),
           ),
           NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings_rounded, color: AppTheme.primary),
+            icon:
+                Image.asset('assets/figma/settings.png', width: 21, height: 21),
             label: l10n.tr('nav_settings'),
           ),
         ],

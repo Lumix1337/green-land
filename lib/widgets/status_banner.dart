@@ -6,6 +6,8 @@ class StatusBanner extends StatelessWidget {
   final bool isAllGood;
   final bool hasAlert;
   final String? alertMessage;
+  final String? alertActionText;
+  final VoidCallback? onOpenControls;
   final String statusText;
   final String lastUpdateText;
   final String offlineTitle;
@@ -18,6 +20,8 @@ class StatusBanner extends StatelessWidget {
     required this.isAllGood,
     required this.hasAlert,
     this.alertMessage,
+    this.alertActionText,
+    this.onOpenControls,
     required this.statusText,
     required this.lastUpdateText,
     required this.offlineTitle,
@@ -40,7 +44,8 @@ class StatusBanner extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.cloud_off_rounded, color: AppTheme.statusWarning, size: 28),
+            const Icon(Icons.cloud_off_rounded,
+                color: AppTheme.statusWarning, size: 28),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -73,47 +78,47 @@ class StatusBanner extends StatelessWidget {
 
     // 2. M5: CRITICAL ALERT BANNER (Overheat / Threshold breach)
     if (hasAlert && alertMessage != null) {
-      return Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFEBEE),
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Material(
+          color: AppTheme.statusDanger,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.statusDanger.withOpacity(0.4)),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.warning_amber_rounded, color: AppTheme.statusDanger, size: 28),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    alertMessage!,
-                    style: const TextStyle(
-                      color: AppTheme.statusDanger,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+          clipBehavior: Clip.antiAlias,
+          child: Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: onOpenControls,
+                  child: Padding(
+                    padding: const EdgeInsets.all(13),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(alertMessage!,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700)),
+                        if (alertActionText != null &&
+                            onOpenControls != null) ...[
+                          const SizedBox(height: 6),
+                          Text('$alertActionText →',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 12)),
+                        ],
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Нажмите «Управление», чтобы охладить теплицу',
-                    style: TextStyle(
-                      color: Color(0xFFC62828),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-            if (onDismissAlert != null)
-              IconButton(
-                icon: const Icon(Icons.close, color: AppTheme.statusDanger, size: 18),
-                onPressed: onDismissAlert,
-              ),
-          ],
+              if (onDismissAlert != null)
+                IconButton(
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: onDismissAlert,
+                ),
+            ],
+          ),
         ),
       );
     }
@@ -126,40 +131,25 @@ class StatusBanner extends StatelessWidget {
         color: isAllGood ? const Color(0xFFE8F5E9) : const Color(0xFFFFF8E1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isAllGood 
-              ? AppTheme.primaryLight.withOpacity(0.3) 
+          color: isAllGood
+              ? AppTheme.primaryLight.withOpacity(0.3)
               : AppTheme.statusWarning.withOpacity(0.3),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                isAllGood ? Icons.check_circle_rounded : Icons.info_outline_rounded,
-                color: isAllGood ? AppTheme.primaryDark : AppTheme.statusWarning,
-                size: 20,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                statusText,
-                style: TextStyle(
-                  color: isAllGood ? AppTheme.primaryDark : const Color(0xFFE65100),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          Text(
-            lastUpdateText,
-            style: const TextStyle(
-              color: AppTheme.textMuted,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text(statusText,
+              style: TextStyle(
+                  color: isAllGood
+                      ? AppTheme.primaryDark
+                      : const Color(0xFFA65100),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700)),
+          const SizedBox(height: 4),
+          Text(lastUpdateText,
+              style:
+                  const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
         ],
       ),
     );

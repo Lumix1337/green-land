@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:green_land/l10n/app_localizations.dart';
 import 'package:green_land/services/greenhouse_provider.dart';
 
 void main() {
@@ -13,7 +14,15 @@ void main() {
       provider.dispose();
     });
 
-    test('Actuator toggle triggers feedback loop (Irrigation increases soil moisture)', () async {
+    test('Starts in English and allows switching languages', () {
+      expect(provider.language, AppLanguage.en);
+      provider.switchLanguage(AppLanguage.kz);
+      expect(provider.language, AppLanguage.kz);
+    });
+
+    test(
+        'Actuator toggle triggers feedback loop (Irrigation increases soil moisture)',
+        () async {
       final initialSoil = provider.telemetry.soilMoisture;
       await provider.toggleActuator('irrigation', true);
 

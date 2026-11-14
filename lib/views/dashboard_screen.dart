@@ -6,7 +6,9 @@ import '../widgets/metric_card.dart';
 import '../widgets/status_banner.dart';
 
 class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+  final VoidCallback? onOpenControls;
+
+  const DashboardScreen({super.key, this.onOpenControls});
 
   @override
   Widget build(BuildContext context) {
@@ -16,21 +18,24 @@ class DashboardScreen extends StatelessWidget {
 
     // Evaluate health statuses for 4 parameters
     // 1. Air Temperature (Optimal: 18 - 28°C)
-    final tempStatus = telemetry.airTemp > 30.0 
-        ? MetricStatus.danger 
-        : (telemetry.airTemp < 18.0 || telemetry.airTemp > 28.0) 
-            ? MetricStatus.warning 
+    final tempStatus = telemetry.airTemp > 30.0
+        ? MetricStatus.danger
+        : (telemetry.airTemp < 18.0 || telemetry.airTemp > 28.0)
+            ? MetricStatus.warning
             : MetricStatus.normal;
-    final tempStatusText = tempStatus == MetricStatus.normal 
-        ? l10n.tr('chip_normal') 
-        : (tempStatus == MetricStatus.danger ? l10n.tr('chip_overheat') : l10n.tr('chip_warning'));
+    final tempStatusText = tempStatus == MetricStatus.normal
+        ? l10n.tr('chip_normal')
+        : (tempStatus == MetricStatus.danger
+            ? l10n.tr('chip_overheat')
+            : l10n.tr('chip_warning'));
 
     // 2. Air Humidity (Optimal: 50 - 75%)
-    final humidityStatus = (telemetry.airHumidity < 40.0 || telemetry.airHumidity > 85.0)
-        ? MetricStatus.warning
-        : MetricStatus.normal;
-    final humidityStatusText = humidityStatus == MetricStatus.normal 
-        ? l10n.tr('chip_normal') 
+    final humidityStatus =
+        (telemetry.airHumidity < 40.0 || telemetry.airHumidity > 85.0)
+            ? MetricStatus.warning
+            : MetricStatus.normal;
+    final humidityStatusText = humidityStatus == MetricStatus.normal
+        ? l10n.tr('chip_normal')
         : l10n.tr('chip_warning');
 
     // 3. Soil Moisture (Optimal: 35 - 70%)
@@ -39,9 +44,11 @@ class DashboardScreen extends StatelessWidget {
         : telemetry.soilMoisture < 35.0
             ? MetricStatus.warning
             : MetricStatus.normal;
-    final soilStatusText = soilStatus == MetricStatus.normal 
-        ? l10n.tr('chip_normal') 
-        : (soilStatus == MetricStatus.danger ? l10n.tr('chip_drought') : l10n.tr('chip_dry'));
+    final soilStatusText = soilStatus == MetricStatus.normal
+        ? l10n.tr('chip_normal')
+        : (soilStatus == MetricStatus.danger
+            ? l10n.tr('chip_drought')
+            : l10n.tr('chip_dry'));
 
     // 4. Light Level (Optimal: 5000 - 20000 Lux in daytime)
     final lightStatus = MetricStatus.normal;
@@ -50,13 +57,14 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
+        toolbarHeight: 84,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               l10n.tr('app_name'),
               style: const TextStyle(
-                color: AppTheme.primaryDark,
+                color: Colors.white,
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
                 letterSpacing: -0.5,
@@ -65,7 +73,7 @@ class DashboardScreen extends StatelessWidget {
             Text(
               l10n.tr('greenhouse_title'),
               style: const TextStyle(
-                color: AppTheme.textSecondary,
+                color: Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
@@ -75,7 +83,7 @@ class DashboardScreen extends StatelessWidget {
         actions: [
           // M8 Stress test quick simulation button for demo
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_rounded, color: AppTheme.primaryDark),
+            icon: const Icon(Icons.more_vert_rounded, color: Colors.white),
             onSelected: (value) {
               if (value == 'toggle_offline') {
                 provider.toggleOfflineStressTest(!provider.isOffline);
@@ -88,7 +96,8 @@ class DashboardScreen extends StatelessWidget {
                 value: 'trigger_overheat',
                 child: Row(
                   children: [
-                    const Icon(Icons.local_fire_department_rounded, color: AppTheme.statusDanger, size: 20),
+                    const Icon(Icons.local_fire_department_rounded,
+                        color: AppTheme.statusDanger, size: 20),
                     const SizedBox(width: 10),
                     Text(l10n.tr('scenario2_overheat')),
                   ],
@@ -99,12 +108,18 @@ class DashboardScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      provider.isOffline ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
-                      color: provider.isOffline ? AppTheme.primary : AppTheme.statusWarning,
+                      provider.isOffline
+                          ? Icons.cloud_done_rounded
+                          : Icons.cloud_off_rounded,
+                      color: provider.isOffline
+                          ? AppTheme.primary
+                          : AppTheme.statusWarning,
                       size: 20,
                     ),
                     const SizedBox(width: 10),
-                    Text(provider.isOffline ? l10n.tr('restore_connection') : l10n.tr('stress_test_action')),
+                    Text(provider.isOffline
+                        ? l10n.tr('restore_connection')
+                        : l10n.tr('stress_test_action')),
                   ],
                 ),
               ),
@@ -131,11 +146,16 @@ class DashboardScreen extends StatelessWidget {
                   isOffline: provider.isOffline,
                   isAllGood: telemetry.isOptimal,
                   hasAlert: provider.hasActiveAlert,
-                  alertMessage: provider.alertMessage,
-                  statusText: telemetry.isOptimal 
-                      ? l10n.tr('status_all_good') 
+                  alertMessage: tempStatus == MetricStatus.danger
+                      ? '${l10n.tr('chip_overheat')} · ${telemetry.airTemp.toStringAsFixed(1)} °C'
+                      : provider.alertMessage,
+                  alertActionText: l10n.tr('open_controls'),
+                  onOpenControls: onOpenControls,
+                  statusText: telemetry.isOptimal
+                      ? l10n.tr('status_all_good')
                       : l10n.tr('status_warning'),
-                  lastUpdateText: '${l10n.tr('last_update')}: ${telemetry.getTimeAgo(provider.language)}',
+                  lastUpdateText:
+                      '${l10n.tr('last_update')}: ${telemetry.getTimeAgo(provider.language)}',
                   offlineTitle: l10n.tr('offline_banner_title'),
                   offlineDesc: l10n.tr('offline_banner_desc'),
                   onDismissAlert: () => provider.dismissAlert(),
@@ -145,7 +165,6 @@ class DashboardScreen extends StatelessWidget {
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final crossAxisCount = constraints.maxWidth > 550 ? 4 : 2;
-                    final cardAspectRatio = constraints.maxWidth > 550 ? 1.2 : 0.95;
 
                     return GridView.count(
                       crossAxisCount: crossAxisCount,
@@ -153,7 +172,9 @@ class DashboardScreen extends StatelessWidget {
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisSpacing: 14,
                       mainAxisSpacing: 14,
-                      childAspectRatio: cardAspectRatio,
+                      mainAxisExtent: 126 +
+                          (MediaQuery.textScalerOf(context).scale(25) - 25)
+                              .clamp(0.0, 150.0),
                       children: [
                         // Card 1: Air Temperature
                         MetricCard(
@@ -191,7 +212,8 @@ class DashboardScreen extends StatelessWidget {
                         // Card 4: Light Level
                         MetricCard(
                           title: l10n.tr('param_light_level'),
-                          value: (telemetry.lightLevel / 1000).toStringAsFixed(1),
+                          value:
+                              (telemetry.lightLevel / 1000).toStringAsFixed(1),
                           unit: 'kLux',
                           icon: Icons.wb_sunny_rounded,
                           status: lightStatus,
@@ -215,22 +237,13 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryLight.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.tune_rounded, color: AppTheme.primary, size: 22),
-                      ),
-                      const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              provider.settings.autoMode 
-                                  ? l10n.tr('mode_auto') 
+                              provider.settings.autoMode
+                                  ? l10n.tr('mode_auto')
                                   : l10n.tr('mode_manual'),
                               style: const TextStyle(
                                 color: AppTheme.textPrimary,
@@ -257,6 +270,13 @@ class DashboardScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (!provider.isOffline && !provider.hasActiveAlert) ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: provider.triggerOverheatAlert,
+                    child: Text(l10n.tr('scenario2_overheat')),
+                  ),
+                ],
               ],
             ),
           ),

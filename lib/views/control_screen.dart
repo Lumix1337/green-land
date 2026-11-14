@@ -26,34 +26,27 @@ class ControlScreen extends StatelessWidget {
             children: [
               // COMMAND LATENCY INDICATOR (Requirement: < 5s)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.all(13),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFFE8F5E9),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.dividerColor),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.statusSuccess,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        '${l10n.tr('latency_indicator')} (${provider.commandLatencySeconds.toStringAsFixed(1)} с)',
+                    Text(
+                        l10n.tr(provider.isOffline
+                            ? 'offline_banner_title'
+                            : 'equipment_online'),
                         style: const TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const Icon(Icons.speed_rounded, color: AppTheme.primary, size: 18),
+                            color: AppTheme.primaryDark,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    Text(
+                        '${l10n.tr('latency_indicator')}: ${provider.commandLatencySeconds.toStringAsFixed(1)} s',
+                        style: const TextStyle(
+                            color: AppTheme.primaryDark, fontSize: 12)),
                   ],
                 ),
               ),
@@ -113,9 +106,10 @@ class ControlScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // EMERGENCY ALL-STOP BUTTON
-              OutlinedButton.icon(
+              OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppTheme.statusDanger),
+                  side: BorderSide.none,
+                  backgroundColor: const Color(0xFFFFEBEE),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -127,8 +121,7 @@ class ControlScreen extends StatelessWidget {
                   provider.toggleActuator('heater', false);
                   provider.toggleActuator('lighting', false);
                 },
-                icon: const Icon(Icons.power_settings_new_rounded, color: AppTheme.statusDanger),
-                label: Text(
+                child: Text(
                   l10n.tr('btn_turn_all_off'),
                   style: const TextStyle(
                     color: AppTheme.statusDanger,

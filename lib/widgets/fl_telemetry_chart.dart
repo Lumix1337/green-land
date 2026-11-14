@@ -31,7 +31,8 @@ class FlTelemetryChart extends StatelessWidget {
     final double yMin = (minVal * 0.8).clamp(0.0, double.infinity);
     final double yMax = maxVal * 1.15;
 
-    final spots = List.generate(values.length, (i) => FlSpot(i.toDouble(), values[i]));
+    final spots =
+        List.generate(values.length, (i) => FlSpot(i.toDouble(), values[i]));
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -43,40 +44,9 @@ class FlTelemetryChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, color: color, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Макс: ${maxVal.toStringAsFixed(1)}$unit',
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
           const SizedBox(height: 20),
 
           // FL_CHART LINE CHART COMPONENT (M6)
@@ -91,7 +61,8 @@ class FlTelemetryChart extends StatelessWidget {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  horizontalInterval: (yMax - yMin) / 3 > 0 ? (yMax - yMin) / 3 : 5.0,
+                  horizontalInterval:
+                      (yMax - yMin) / 3 > 0 ? (yMax - yMin) / 3 : 5.0,
                   getDrawingHorizontalLine: (value) => FlLine(
                     color: AppTheme.dividerColor.withOpacity(0.5),
                     strokeWidth: 1,
@@ -99,8 +70,10 @@ class FlTelemetryChart extends StatelessWidget {
                 ),
                 titlesData: FlTitlesData(
                   show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -134,6 +107,8 @@ class FlTelemetryChart extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 6),
                           child: Text(
                             labels[index],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: AppTheme.textMuted,
                               fontSize: 11,
@@ -162,7 +137,8 @@ class FlTelemetryChart extends StatelessWidget {
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                         ),
-                        labelResolver: (line) => '${threshold.toStringAsFixed(0)}$unit',
+                        labelResolver: (line) =>
+                            '${threshold.toStringAsFixed(0)}$unit',
                       ),
                     ),
                   ],
@@ -195,7 +171,7 @@ class FlTelemetryChart extends StatelessWidget {
                     dotData: FlDotData(
                       show: true,
                       getDotPainter: (spot, percent, barData, index) {
-                        final isAlert = spot.y < threshold && title.contains('влажности');
+                        final isAlert = spot.y < threshold && unit == '%';
                         return FlDotCirclePainter(
                           radius: isAlert ? 5.5 : 4,
                           color: isAlert ? AppTheme.statusDanger : Colors.white,
@@ -219,14 +195,15 @@ class FlTelemetryChart extends StatelessWidget {
             children: [
               Container(width: 14, height: 3, color: AppTheme.statusDanger),
               const SizedBox(width: 6),
-              Text(
+              Flexible(
+                  child: Text(
                 thresholdLabel,
                 style: const TextStyle(
                   color: AppTheme.textMuted,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
-              ),
+              )),
             ],
           ),
         ],

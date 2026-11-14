@@ -26,7 +26,7 @@ class TelemetryController extends ChangeNotifier {
     _telemetryService.startRealtimeSubscription();
   }
 
-  String getLastUpdatedText([AppLanguage language = AppLanguage.ru]) {
+  String getLastUpdatedText([AppLanguage language = AppLanguage.en]) {
     return _telemetryService.latestTelemetry.getTimeAgo(language);
   }
 
