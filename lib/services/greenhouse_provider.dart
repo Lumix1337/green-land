@@ -174,6 +174,30 @@ class GreenhouseProvider extends ChangeNotifier {
               .limit(1);
           if (rows.isNotEmpty) {
             _supabaseService.setActiveGreenhouseId(rows.first['id'].toString());
+          } else {
+            // Provision an isolated greenhouse for a newly registered second account (M1)
+            final newGhId =
+                'gh_${userId.replaceAll('-', '').substring(0, 8)}';
+            _supabaseService.setActiveGreenhouseId(newGhId);
+            await client.from('greenhouses').upsert({
+              'id': newGhId,
+              'owner_id': userId,
+              'name': 'Greenhouse ($email)',
+            });
+            await client.from('actuators').upsert({
+              'greenhouse_id': newGhId,
+              'irrigation': false,
+              'ventilation': false,
+              'heater': false,
+              'lighting': false,
+            });
+            await client.from('telemetry').insert({
+              'greenhouse_id': newGhId,
+              'air_temp': 22.0,
+              'air_humidity': 55.0,
+              'soil_moisture': 50.0,
+              'light_level': 10000.0,
+            });
           }
         } catch (e) {
           debugPrint('⚠️ [GreenhouseProvider] Could not resolve greenhouse id: $e');
@@ -181,8 +205,42 @@ class GreenhouseProvider extends ChangeNotifier {
       }
       _telemetryService.startRealtimeSubscription();
       _actuatorService.startRealtimeSubscription();
+      await _loadSettingsFromSupabase();
     }
     notifyListeners();
+  }
+
+  Future<void> _loadSettingsFromSupabase() async {
+    final client = _supabaseService.client;
+    if (client == null || _supabaseService.isMockMode) return;
+    try {
+      final rows = await client
+          .from('settings')
+          .select()
+          .eq('greenhouse_id', _supabaseService.activeGreenhouseId)
+          .limit(1);
+      if (rows.isNotEmpty) {
+        _settings = SettingsModel.fromJson(Map<String, dynamic>.from(rows.first));
+        _alertService.evaluateTelemetry(_telemetry, _settings);
+      }
+    } catch (e) {
+      debugPrint('⚠️ [GreenhouseProvider] Could not load settings: $e');
+    }
+  }
+
+  Future<void> _saveSettingsToSupabase() async {
+    final client = _supabaseService.client;
+    if (client == null || _supabaseService.isMockMode) return;
+    try {
+      await client.from('settings').update({
+        'auto_mode': _settings.autoMode,
+        'min_soil_moisture': _settings.minSoilMoisture,
+        'max_air_temp': _settings.maxAirTemp,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('greenhouse_id', _supabaseService.activeGreenhouseId);
+    } catch (e) {
+      debugPrint('⚠️ [GreenhouseProvider] Could not persist settings: $e');
+    }
   }
 
   Future<void> login(String email, String password) async {
@@ -195,6 +253,15 @@ class GreenhouseProvider extends ChangeNotifier {
   Future<void> logout() async {
     _isLoggedIn = false;
     _userEmail = '';
+    _telemetryService.stopRealtimeSubscription();
+    _actuatorService.stopRealtimeSubscription();
+    _telemetry = TelemetryModel.initial();
+    _actuators = ActuatorModel.initial();
+    _settings = SettingsModel.initial();
+    _hasActiveAlert = false;
+    _alertMessage = null;
+    _alertService.clearAllAlerts();
+    _supabaseService.setActiveGreenhouseId('gh_erlan_01');
     await _authService.signOut();
     notifyListeners();
   }
@@ -283,9 +350,20 @@ class GreenhouseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> refreshLiveData() async {
+    if (_supabaseService.isMockMode) return;
+    await Future.wait([
+      _telemetryService.fetchLatest(),
+      _actuatorService.fetchCurrentState(),
+      _loadSettingsFromSupabase(),
+    ]);
+    notifyListeners();
+  }
+
   // M4 Mode Toggle
   void toggleAutoMode(bool auto) {
     _settings = _settings.copyWith(autoMode: auto);
+    _saveSettingsToSupabase();
     notifyListeners();
   }
 
@@ -302,6 +380,7 @@ class GreenhouseProvider extends ChangeNotifier {
       maxAirTemp: maxTemp ?? _settings.maxAirTemp,
     );
     _alertService.evaluateTelemetry(_telemetry, _settings);
+    _saveSettingsToSupabase();
     notifyListeners();
     return true;
   }

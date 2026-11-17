@@ -42,7 +42,11 @@ migrate_working_dir/
 # Environment files
 .env
 .env.*
+*.env
+assets/config/supabase.env
 !.env.example
+!*.env.example
+!assets/config/supabase.env.example
 
 # Local agents and metadata
 .agents/

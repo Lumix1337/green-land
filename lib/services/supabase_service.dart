@@ -63,7 +63,7 @@ class SupabaseService {
     final result = await ErrorHandlerService().safeRun<bool>(() async {
       await Supabase.initialize(
         url: supabaseUrl,
-        anonKey: supabaseKey,
+        publishableKey: supabaseKey,
         realtimeClientOptions: const RealtimeClientOptions(
           eventsPerSecond: 10,
         ),

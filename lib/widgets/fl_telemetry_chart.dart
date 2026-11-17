@@ -72,7 +72,7 @@ class FlTelemetryChart extends StatelessWidget {
                 minY: yMin,
                 maxY: yMax,
                 minX: 0,
-                maxX: (values.length - 1).toDouble(),
+                maxX: values.length > 1 ? (values.length - 1).toDouble() : 1.0,
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,

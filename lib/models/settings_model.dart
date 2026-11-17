@@ -37,6 +37,20 @@ class SettingsModel {
     );
   }
 
+  factory SettingsModel.fromJson(Map<String, dynamic> json) {
+    return SettingsModel(
+      autoMode: json['auto_mode'] as bool? ?? true,
+      minSoilMoisture:
+          (json['min_soil_moisture'] as num?)?.toDouble() ?? 30.0,
+      maxAirTemp: (json['max_air_temp'] as num?)?.toDouble() ?? 28.0,
+      minAirTemp: (json['min_air_temp'] as num?)?.toDouble() ?? 18.0,
+      dayTariffKzt: (json['day_tariff_kzt'] as num?)?.toDouble() ?? 28.50,
+      nightTariffKzt: (json['night_tariff_kzt'] as num?)?.toDouble() ?? 11.20,
+      monthlySavedTenge:
+          (json['monthly_saved_tenge'] as num?)?.toDouble() ?? 48200.0,
+    );
+  }
+
   static SettingsModel initial() {
     return const SettingsModel(
       autoMode: true,

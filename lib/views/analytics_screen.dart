@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../models/historical_point.dart';
 import '../services/greenhouse_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/fl_telemetry_chart.dart';
@@ -14,6 +16,8 @@ class AnalyticsScreen extends StatefulWidget {
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int _selectedPeriod = 1; // 1 for 24h, 7 for 7 days
   bool _useLineChart = true; // FlChart LineChart vs Bar view
+  List<HistoricalTelemetryPoint>? _remoteHistory;
+  String? _loadedForGreenhouse;
 
   // Mock historical points for soil moisture (7 days)
   final List<double> _soil7Days = [52.0, 22.0, 42.0, 68.0, 54.0, 45.0, 46.0];
@@ -34,15 +38,48 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     '24:00'
   ];
 
+  Future<void> _loadRemoteHistory(GreenhouseProvider provider) async {
+    if (provider.supabaseService.isMockMode) return;
+    final points =
+        await provider.telemetryService.fetchHistory(days: _selectedPeriod);
+    if (!mounted) return;
+    setState(() {
+      _remoteHistory = points;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<GreenhouseProvider>();
     final l10n = provider.l10n;
+    final activeGh = provider.supabaseService.activeGreenhouseId;
+    if (!provider.supabaseService.isMockMode &&
+        _loadedForGreenhouse != '$activeGh:$_selectedPeriod') {
+      _loadedForGreenhouse = '$activeGh:$_selectedPeriod';
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _loadRemoteHistory(provider);
+      });
+    }
 
-    final soilValues = _selectedPeriod == 7 ? _soil7Days : _soil24h;
-    final tempValues = _selectedPeriod == 7 ? _temp7Days : _temp24h;
-    final labels =
-        _selectedPeriod == 7 ? l10n.tr('weekdays_short').split(' ') : _hours24;
+    final useRemote = !provider.supabaseService.isMockMode &&
+        _remoteHistory != null &&
+        _remoteHistory!.isNotEmpty;
+
+    final soilValues = useRemote
+        ? _remoteHistory!.map((p) => p.soilMoisture).toList()
+        : (_selectedPeriod == 7 ? _soil7Days : _soil24h);
+    final tempValues = useRemote
+        ? _remoteHistory!.map((p) => p.airTemp).toList()
+        : (_selectedPeriod == 7 ? _temp7Days : _temp24h);
+    final labels = useRemote
+        ? _remoteHistory!
+            .map((p) => _selectedPeriod == 7
+                ? DateFormat('dd/MM').format(p.timestamp.toLocal())
+                : DateFormat('HH:mm').format(p.timestamp.toLocal()))
+            .toList()
+        : (_selectedPeriod == 7
+            ? l10n.tr('weekdays_short').split(' ')
+            : _hours24);
 
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,

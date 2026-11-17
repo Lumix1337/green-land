@@ -43,24 +43,55 @@ class ActuatorService {
   void startRealtimeSubscription() {
     final client = _supabaseService.client;
     if (client != null && !_supabaseService.isMockMode) {
+      fetchCurrentState();
       _errorHandler.safeRunSync(() {
-        _actuatorChannel = client.channel('public:actuators')
-          .onPostgresChanges(
-            event: PostgresChangeEvent.all,
-            schema: 'public',
-            table: 'actuators',
-            callback: (payload) {
-              final newRecord = payload.newRecord;
-              if (newRecord.isNotEmpty) {
-                _actuators = ActuatorModel.fromJson(newRecord);
-                _actuatorStreamController.add(_actuators);
-              }
-            },
-          )
-          .subscribe();
-        debugPrint('🌿 [ActuatorService] Subscribed to Supabase Realtime actuators table');
+        _actuatorChannel?.unsubscribe();
+        _actuatorChannel = client
+            .channel('public:actuators_${_supabaseService.activeGreenhouseId}')
+            .onPostgresChanges(
+              event: PostgresChangeEvent.all,
+              schema: 'public',
+              table: 'actuators',
+              callback: (payload) {
+                final newRecord = payload.newRecord;
+                if (newRecord.isNotEmpty) {
+                  final recordGh = newRecord['greenhouse_id']?.toString();
+                  if (recordGh == null ||
+                      recordGh == _supabaseService.activeGreenhouseId) {
+                    _actuators = ActuatorModel.fromJson(newRecord);
+                    _actuatorStreamController.add(_actuators);
+                  }
+                }
+              },
+            )
+            .subscribe();
+        debugPrint(
+            '🌿 [ActuatorService] Subscribed to Supabase Realtime actuators table');
       }, contextMessage: 'Actuators Realtime subscription');
     }
+  }
+
+  /// Fetch current actuator states from Supabase for the active greenhouse (M3)
+  Future<void> fetchCurrentState() async {
+    final client = _supabaseService.client;
+    if (client == null || _supabaseService.isMockMode) return;
+    await _errorHandler.safeRun<void>(() async {
+      final List<dynamic> data = await client
+          .from('actuators')
+          .select()
+          .eq('greenhouse_id', _supabaseService.activeGreenhouseId)
+          .limit(1);
+      if (data.isNotEmpty) {
+        _actuators =
+            ActuatorModel.fromJson(Map<String, dynamic>.from(data.first));
+        _actuatorStreamController.add(_actuators);
+      }
+    }, contextMessage: 'fetchCurrentState actuators');
+  }
+
+  void stopRealtimeSubscription() {
+    _actuatorChannel?.unsubscribe();
+    _actuatorChannel = null;
   }
 
   /// Send remote command to Supabase actuators table (M3)

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 import 'services/greenhouse_provider.dart';
 import 'services/supabase_service.dart';
@@ -12,6 +13,36 @@ import 'theme/app_theme.dart';
 import 'views/auth_screen.dart';
 import 'views/main_navigation_screen.dart';
 
+Future<({String url, String key})> _loadSupabaseConfig() async {
+  var url = const String.fromEnvironment('SUPABASE_URL');
+  var key = const String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
+  if (key.isEmpty) {
+    key = const String.fromEnvironment('SUPABASE_ANON_KEY');
+  }
+  if (url.isNotEmpty && key.isNotEmpty) {
+    return (url: url, key: key);
+  }
+  try {
+    final raw = await rootBundle.loadString('assets/config/supabase.env');
+    for (final line in raw.split('\n')) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+      final eq = trimmed.indexOf('=');
+      if (eq <= 0) continue;
+      final k = trimmed.substring(0, eq).trim();
+      final v = trimmed.substring(eq + 1).trim();
+      if (k == 'SUPABASE_URL' && url.isEmpty) url = v;
+      if ((k == 'SUPABASE_PUBLISHABLE_KEY' || k == 'SUPABASE_ANON_KEY') &&
+          key.isEmpty) {
+        key = v;
+      }
+    }
+  } catch (_) {
+    // No local supabase.env asset bundled; resilient mock mode remains active.
+  }
+  return (url: url, key: key);
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -23,9 +54,10 @@ Future<void> main() async {
 
   // Task 1: Resilient initialization of Supabase SDK (M1, M8)
   try {
+    final config = await _loadSupabaseConfig();
     await SupabaseService().initialize(
-      url: const String.fromEnvironment('SUPABASE_URL'),
-      anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+      url: config.url,
+      anonKey: config.key,
     );
   } catch (e) {
     debugPrint(

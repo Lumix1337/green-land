@@ -57,7 +57,7 @@ class DashboardScreen extends StatelessWidget {
         soilStatus == MetricStatus.normal;
 
     // 4. Light Level (Optimal: 5000 - 20000 Lux in daytime)
-    final lightStatus = MetricStatus.normal;
+    const lightStatus = MetricStatus.normal;
     final lightStatusText = l10n.tr('chip_optimum');
 
     return Scaffold(
@@ -138,8 +138,7 @@ class DashboardScreen extends StatelessWidget {
         child: RefreshIndicator(
           color: AppTheme.primary,
           onRefresh: () async {
-            // Trigger manual update
-            await Future.delayed(const Duration(milliseconds: 600));
+            await provider.refreshLiveData();
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
