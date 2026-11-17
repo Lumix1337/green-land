@@ -71,6 +71,96 @@ class AppLocalizations {
       AppLanguage.kz: 'Демо-кіру (Ерлан фермер)',
       AppLanguage.en: 'Try demo as Erlan',
     },
+    'auth_header_subtitle': {
+      AppLanguage.ru: 'Мониторинг и управление теплицей',
+      AppLanguage.kz: 'Жылыжайды бақылау және басқару',
+      AppLanguage.en: 'Greenhouse monitoring and control',
+    },
+    'auth_welcome_back': {
+      AppLanguage.ru: 'С возвращением',
+      AppLanguage.kz: 'Қош келдіңіз',
+      AppLanguage.en: 'Welcome back',
+    },
+    'auth_create_account': {
+      AppLanguage.ru: 'Создать аккаунт',
+      AppLanguage.kz: 'Тіркелгі жасау',
+      AppLanguage.en: 'Create your account',
+    },
+    'auth_check_email': {
+      AppLanguage.ru: 'Проверьте почту',
+      AppLanguage.kz: 'Поштаны тексеріңіз',
+      AppLanguage.en: 'Check your email',
+    },
+    'auth_signin_desc': {
+      AppLanguage.ru: 'Войдите для управления теплицей.',
+      AppLanguage.kz: 'Жылыжайды басқару үшін кіріңіз.',
+      AppLanguage.en: 'Sign in to manage your greenhouse.',
+    },
+    'auth_signup_desc': {
+      AppLanguage.ru: 'Создайте аккаунт с помощью email.',
+      AppLanguage.kz: 'Email арқылы тіркелгі жасаңыз.',
+      AppLanguage.en: 'Create an account with your email.',
+    },
+    'auth_verify_desc': {
+      AppLanguage.ru: 'Откройте ссылку подтверждения в письме и вернитесь для входа.',
+      AppLanguage.kz: 'Хаттағы растау сілтемесін ашып, кіру үшін қайта оралыңыз.',
+      AppLanguage.en: 'Open the confirmation link in your email, then return here to sign in.',
+    },
+    'auth_confirm_password': {
+      AppLanguage.ru: 'Подтвердите пароль',
+      AppLanguage.kz: 'Құпиясөзді растаңыз',
+      AppLanguage.en: 'Confirm password',
+    },
+    'auth_signup_btn': {
+      AppLanguage.ru: 'Зарегистрироваться',
+      AppLanguage.kz: 'Тіркелу',
+      AppLanguage.en: 'Sign up',
+    },
+    'auth_signin_btn': {
+      AppLanguage.ru: 'Войти',
+      AppLanguage.kz: 'Кіру',
+      AppLanguage.en: 'Sign in',
+    },
+    'auth_back_to_signin': {
+      AppLanguage.ru: 'Вернуться ко входу',
+      AppLanguage.kz: 'Кіруге оралу',
+      AppLanguage.en: 'Back to sign in',
+    },
+    'auth_please_wait': {
+      AppLanguage.ru: 'Подождите…',
+      AppLanguage.kz: 'Күте тұрыңыз…',
+      AppLanguage.en: 'Please wait…',
+    },
+    'auth_switch_to_signup': {
+      AppLanguage.ru: 'Впервые в GreenLand? Регистрация',
+      AppLanguage.kz: 'GreenLand-та алғаш рет пе? Тіркелу',
+      AppLanguage.en: 'New to GreenLand? Sign up',
+    },
+    'auth_switch_to_signin': {
+      AppLanguage.ru: 'Уже есть аккаунт? Войти',
+      AppLanguage.kz: 'Тіркелгіңіз бар ма? Кіру',
+      AppLanguage.en: 'Already have an account? Sign in',
+    },
+    'auth_invalid_email': {
+      AppLanguage.ru: 'Введите корректный email.',
+      AppLanguage.kz: 'Дұрыс email енгізіңіз.',
+      AppLanguage.en: 'Enter a valid email address.',
+    },
+    'auth_short_password': {
+      AppLanguage.ru: 'Введите не менее 6 символов.',
+      AppLanguage.kz: 'Кемінде 6 таңба енгізіңіз.',
+      AppLanguage.en: 'Enter at least 6 characters.',
+    },
+    'auth_passwords_mismatch': {
+      AppLanguage.ru: 'Пароли не совпадают.',
+      AppLanguage.kz: 'Құпиясөздер сәйкес келмейді.',
+      AppLanguage.en: 'Passwords do not match.',
+    },
+    'auth_offline_mode_note': {
+      AppLanguage.ru: 'Автономный режим: вход без облака Supabase',
+      AppLanguage.kz: 'Дербес режим: Supabase бұлтынсыз кіру',
+      AppLanguage.en: 'Offline mode: local authentication active',
+    },
 
     // Dashboard Screen (M2)
     'greenhouse_title': {
@@ -397,6 +487,11 @@ class AppLocalizations {
       AppLanguage.ru: 'Ночь',
       AppLanguage.kz: 'Түнде',
     },
+    'account_title': {
+      AppLanguage.en: 'Greenhouse account',
+      AppLanguage.ru: 'Аккаунт теплицы',
+      AppLanguage.kz: 'Жылыжай аккаунты',
+    },
     'profile_owner': {
       AppLanguage.en: 'Erlan · Greenhouse owner',
       AppLanguage.ru: 'Ерлан · Владелец теплицы',
@@ -447,5 +542,18 @@ class AppLocalizations {
   String tr(String key) {
     if (!_localizedValues.containsKey(key)) return key;
     return _localizedValues[key]![language] ?? key;
+  }
+
+  String autoRuleSummary(double minSoil, double maxTemp) {
+    final soil = minSoil.toStringAsFixed(0);
+    final temp = maxTemp.toStringAsFixed(0);
+    switch (language) {
+      case AppLanguage.ru:
+        return 'Полив при почве < $soil%, вентиляция > $temp°C';
+      case AppLanguage.kz:
+        return 'Топырақ < $soil% болса суару, > $temp°C желдету';
+      case AppLanguage.en:
+        return 'Watering < $soil% soil · Ventilation > $temp°C';
+    }
   }
 }

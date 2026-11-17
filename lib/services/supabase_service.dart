@@ -8,14 +8,17 @@ class SupabaseService {
   factory SupabaseService() => _instance;
   SupabaseService._internal();
 
-  static const String defaultUrl = 'https://greenland-smart-greenhouse.supabase.co';
-  static const String defaultAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdyZWVubGFuZC1zbWFydC1ncmVlbmhvdXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.mock_signature_for_offline_and_eval';
+  static const String defaultUrl =
+      'https://greenland-smart-greenhouse.supabase.co';
+  static const String defaultAnonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdyZWVubGFuZC1zbWFydC1ncmVlbmhvdXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.mock_signature_for_offline_and_eval';
 
   bool _isInitialized = false;
   bool _isMockMode = true;
   String _activeGreenhouseId = 'gh_erlan_01';
 
-  final StreamController<bool> _connectivityStream = StreamController<bool>.broadcast();
+  final StreamController<bool> _connectivityStream =
+      StreamController<bool>.broadcast();
 
   bool get isInitialized => _isInitialized;
   bool get isMockMode => _isMockMode;
@@ -35,21 +38,25 @@ class SupabaseService {
     if (forceMock) {
       _isMockMode = true;
       _isInitialized = true;
-      debugPrint('🌿 [SupabaseService] Initialized in Mock / Offline Resilience Mode');
+      debugPrint(
+          '🌿 [SupabaseService] Initialized in Mock / Offline Resilience Mode');
       return true;
     }
 
     final supabaseUrl = url ?? defaultUrl;
     final supabaseKey = anonKey ?? defaultAnonKey;
 
-    final isPlaceholder = supabaseUrl.contains('greenland-smart-greenhouse.supabase.co') ||
+    final isPlaceholder = supabaseUrl.isEmpty ||
+        supabaseKey.isEmpty ||
+        supabaseUrl.contains('greenland-smart-greenhouse.supabase.co') ||
         supabaseKey.contains('mock_signature');
 
     if (forceMock || isPlaceholder) {
       _isMockMode = true;
       _isInitialized = true;
       _connectivityStream.add(true);
-      debugPrint('🌿 [SupabaseService] Initialized in Mock / Offline Resilience Mode (placeholder config)');
+      debugPrint(
+          '🌿 [SupabaseService] Initialized in Mock / Offline Resilience Mode (placeholder config)');
       return true;
     }
 
@@ -64,7 +71,8 @@ class SupabaseService {
       _isInitialized = true;
       _isMockMode = false;
       _connectivityStream.add(true);
-      debugPrint('🌿 [SupabaseService] Supabase client initialized successfully at $supabaseUrl');
+      debugPrint(
+          '🌿 [SupabaseService] Supabase client initialized successfully at $supabaseUrl');
       return true;
     }, contextMessage: 'Supabase.initialize', fallbackValue: false);
 
@@ -73,7 +81,8 @@ class SupabaseService {
       _isInitialized = true;
       _isMockMode = true;
       _connectivityStream.add(false);
-      debugPrint('🛡️ [SupabaseService] Fallback to Mock/Offline mode active. App operational.');
+      debugPrint(
+          '🛡️ [SupabaseService] Fallback to Mock/Offline mode active. App operational.');
       return false;
     }
 

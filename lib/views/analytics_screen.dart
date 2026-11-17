@@ -158,7 +158,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           children: [
                             Text(
                               l10n.tr('low_soil_moisture'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Color(0xFFE65100),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
@@ -192,8 +192,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 color: AppTheme.primaryLight,
                 values: soilValues,
                 labels: labels,
-                threshold: 30.0,
-                thresholdLabel: '${l10n.tr('drought_threshold')} (30%)',
+                threshold: provider.settings.minSoilMoisture,
+                thresholdLabel:
+                    '${l10n.tr('drought_threshold')} (${provider.settings.minSoilMoisture.toStringAsFixed(0)}%)',
               ),
 
               const SizedBox(height: 18),
@@ -207,8 +208,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       color: AppTheme.primary,
                       values: tempValues,
                       labels: labels,
-                      threshold: 28.0,
-                      thresholdLabel: '${l10n.tr('heat_threshold')} (28°C)',
+                      threshold: provider.settings.maxAirTemp,
+                      thresholdLabel:
+                          '${l10n.tr('heat_threshold')} (${provider.settings.maxAirTemp.toStringAsFixed(0)}°C)',
                     )
                   : _buildBarChartCard(
                       title: l10n.tr('chart_temp_title'),
@@ -217,8 +219,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       color: AppTheme.primary,
                       values: tempValues,
                       labels: labels,
-                      threshold: 28.0,
-                      thresholdLabel: '${l10n.tr('heat_threshold')} (28°C)',
+                      threshold: provider.settings.maxAirTemp,
+                      thresholdLabel:
+                          '${l10n.tr('heat_threshold')} (${provider.settings.maxAirTemp.toStringAsFixed(0)}°C)',
                     ),
 
               const SizedBox(height: 20),
@@ -239,8 +242,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     required double threshold,
     required String thresholdLabel,
   }) {
+    if (values.isEmpty) {
+      return const SizedBox.shrink();
+    }
     final double maxVal = values.reduce((a, b) => a > b ? a : b);
     final double minVal = values.reduce((a, b) => a < b ? a : b);
+    final double denom = maxVal > 0 ? maxVal * 1.1 : 1.0;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -263,9 +270,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(values.length, (index) {
                 final val = values[index];
-                final isAlert = val < threshold && unit == '%';
+                final isAlert =
+                    unit == '%' ? val < threshold : val > threshold;
                 final heightFactor =
-                    ((val - (minVal * 0.7)) / (maxVal * 1.1)).clamp(0.15, 1.0);
+                    ((val - (minVal * 0.7)) / denom).clamp(0.15, 1.0);
 
                 return Expanded(
                     child: Column(
@@ -288,13 +296,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       decoration: BoxDecoration(
                         color: isAlert
                             ? AppTheme.statusDanger
-                            : color.withOpacity(0.85),
+                            : color.withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      labels[index],
+                      index < labels.length ? labels[index] : '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

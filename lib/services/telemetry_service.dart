@@ -39,16 +39,21 @@ class TelemetryService {
 
     if (client != null && !_supabaseService.isMockMode) {
       _errorHandler.safeRunSync(() {
+        _realtimeChannel?.unsubscribe();
         _realtimeChannel = client.channel('public:telemetry')
           .onPostgresChanges(
-            event: PostgresChangeEvent.insert,
+            event: PostgresChangeEvent.all,
             schema: 'public',
             table: 'telemetry',
             callback: (payload) {
               final newRecord = payload.newRecord;
               if (newRecord.isNotEmpty) {
-                final telemetry = TelemetryModel.fromJson(newRecord);
-                _updateTelemetry(telemetry);
+                final recordGh = newRecord['greenhouse_id']?.toString();
+                if (recordGh == null ||
+                    recordGh == _supabaseService.activeGreenhouseId) {
+                  final telemetry = TelemetryModel.fromJson(newRecord);
+                  _updateTelemetry(telemetry);
+                }
               }
             },
           )
@@ -86,6 +91,7 @@ class TelemetryService {
         final List<dynamic> data = await client
             .from('telemetry')
             .select()
+            .eq('greenhouse_id', _supabaseService.activeGreenhouseId)
             .gte('timestamp', since)
             .order('timestamp', ascending: true);
         return data.cast<Map<String, dynamic>>();
@@ -126,7 +132,7 @@ class TelemetryService {
       final rand = Random();
       final tempDelta = (rand.nextDouble() - 0.5) * 0.3;
       final humDelta = (rand.nextDouble() - 0.5) * 0.6;
-      final soilDelta = -0.15; // natural dry-down
+      const soilDelta = -0.15; // natural dry-down
 
       final updated = _latestTelemetry.copyWith(
         airTemp: double.parse((_latestTelemetry.airTemp + tempDelta).clamp(16.0, 36.0).toStringAsFixed(1)),

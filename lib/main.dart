@@ -23,7 +23,10 @@ Future<void> main() async {
 
   // Task 1: Resilient initialization of Supabase SDK (M1, M8)
   try {
-    await SupabaseService().initialize();
+    await SupabaseService().initialize(
+      url: const String.fromEnvironment('SUPABASE_URL'),
+      anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+    );
   } catch (e) {
     debugPrint(
         '🛡️ [SupabaseService] Initialized in resilient offline mode: $e');
@@ -53,6 +56,22 @@ class GreenLandApp extends StatefulWidget {
 
 class _GreenLandAppState extends State<GreenLandApp> {
   bool _isAuthenticated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final session = SupabaseService().client?.auth.currentSession;
+    if (session != null) {
+      _isAuthenticated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context
+              .read<GreenhouseProvider>()
+              .setSignedInAccount(session.user.email ?? '');
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

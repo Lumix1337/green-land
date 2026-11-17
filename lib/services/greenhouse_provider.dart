@@ -32,7 +32,7 @@ class GreenhouseProvider extends ChangeNotifier {
   AppLanguage _language = AppLanguage.en;
   bool _isLoggedIn = false;
   bool _isOffline = false;
-  String _userEmail = 'erlan.agrotech@gmail.com';
+  String _userEmail = '';
 
   TelemetryModel _telemetry = TelemetryModel.initial();
   ActuatorModel _actuators = ActuatorModel.initial();
@@ -89,6 +89,17 @@ class GreenhouseProvider extends ChangeNotifier {
       if (!_isOffline) {
         _telemetry = updated;
         _alertService.evaluateTelemetry(_telemetry, _settings);
+        if (_settings.autoMode && !_supabaseService.isMockMode) {
+          if (_telemetry.soilMoisture < _settings.minSoilMoisture &&
+              !_actuators.irrigation) {
+            _actuatorService.setActuatorState(name: 'irrigation', value: true);
+          }
+          if (_telemetry.airTemp > _settings.maxAirTemp &&
+              !_actuators.ventilation) {
+            _actuatorService.setActuatorState(
+                name: 'ventilation', value: true);
+          }
+        }
         notifyListeners();
       }
     });
@@ -122,8 +133,10 @@ class GreenhouseProvider extends ChangeNotifier {
       notifyListeners();
     });
 
-    _telemetryService.startRealtimeSubscription();
-    _actuatorService.startRealtimeSubscription();
+    if (!_supabaseService.isMockMode) {
+      _telemetryService.startRealtimeSubscription();
+      _actuatorService.startRealtimeSubscription();
+    }
   }
 
   void switchLanguage(AppLanguage lang) {
@@ -146,6 +159,32 @@ class GreenhouseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setSignedInAccount(String email) async {
+    _userEmail = email;
+    _isLoggedIn = true;
+    final client = _supabaseService.client;
+    if (client != null && !_supabaseService.isMockMode) {
+      final userId = client.auth.currentUser?.id;
+      if (userId != null) {
+        try {
+          final rows = await client
+              .from('greenhouses')
+              .select('id')
+              .eq('owner_id', userId)
+              .limit(1);
+          if (rows.isNotEmpty) {
+            _supabaseService.setActiveGreenhouseId(rows.first['id'].toString());
+          }
+        } catch (e) {
+          debugPrint('⚠️ [GreenhouseProvider] Could not resolve greenhouse id: $e');
+        }
+      }
+      _telemetryService.startRealtimeSubscription();
+      _actuatorService.startRealtimeSubscription();
+    }
+    notifyListeners();
+  }
+
   Future<void> login(String email, String password) async {
     _userEmail = email;
     _isLoggedIn = true;
@@ -155,6 +194,7 @@ class GreenhouseProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     _isLoggedIn = false;
+    _userEmail = '';
     await _authService.signOut();
     notifyListeners();
   }
@@ -167,6 +207,8 @@ class GreenhouseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  double _round1(double value) => double.parse(value.toStringAsFixed(1));
+
   // M3 Remote Control Actuators
   Future<void> toggleActuator(String name, bool value) async {
     final startTime = DateTime.now();
@@ -174,70 +216,70 @@ class GreenhouseProvider extends ChangeNotifier {
     // Delegate to ActuatorService
     await _actuatorService.setActuatorState(name: name, value: value);
 
-    // Apply immediate physical feedback simulation to microclimate
-    switch (name) {
-      case 'irrigation':
-        _actuators =
-            _actuators.copyWith(irrigation: value, updatedAt: DateTime.now());
-        if (value) {
-          _telemetry = TelemetryModel(
-            airTemp: _telemetry.airTemp,
-            airHumidity: min(95.0, _telemetry.airHumidity + 2.0),
-            soilMoisture: min(90.0, _telemetry.soilMoisture + 4.5),
-            lightLevel: _telemetry.lightLevel,
-            timestamp: DateTime.now(),
-          );
-        }
-        break;
-      case 'ventilation':
-        _actuators =
-            _actuators.copyWith(ventilation: value, updatedAt: DateTime.now());
-        if (value) {
-          _telemetry = TelemetryModel(
-            airTemp: max(16.0, _telemetry.airTemp - 2.8),
-            airHumidity: max(35.0, _telemetry.airHumidity - 5.0),
-            soilMoisture: _telemetry.soilMoisture,
-            lightLevel: _telemetry.lightLevel,
-            timestamp: DateTime.now(),
-          );
-          _hasActiveAlert = false;
-          _alertMessage = null;
-          _alertService.clearAllAlerts();
-        }
-        break;
-      case 'heater':
-        _actuators =
-            _actuators.copyWith(heater: value, updatedAt: DateTime.now());
-        if (value) {
-          _telemetry = TelemetryModel(
-            airTemp: min(35.0, _telemetry.airTemp + 3.0),
-            airHumidity: _telemetry.airHumidity,
-            soilMoisture: _telemetry.soilMoisture,
-            lightLevel: _telemetry.lightLevel,
-            timestamp: DateTime.now(),
-          );
-        }
-        break;
-      case 'lighting':
-        _actuators =
-            _actuators.copyWith(lighting: value, updatedAt: DateTime.now());
-        if (value) {
-          _telemetry = TelemetryModel(
-            airTemp: _telemetry.airTemp,
-            airHumidity: _telemetry.airHumidity,
-            soilMoisture: _telemetry.soilMoisture,
-            lightLevel: min(25000.0, _telemetry.lightLevel + 6000.0),
-            timestamp: DateTime.now(),
-          );
-        }
-        break;
+    // Apply local physical feedback simulation when running in mock/offline mode
+    if (_supabaseService.isMockMode) {
+      switch (name) {
+        case 'irrigation':
+          _actuators =
+              _actuators.copyWith(irrigation: value, updatedAt: DateTime.now());
+          if (value) {
+            _telemetry = _telemetry.copyWith(
+              airHumidity: _round1(min(95.0, _telemetry.airHumidity + 2.0)),
+              soilMoisture: _round1(min(90.0, _telemetry.soilMoisture + 4.5)),
+              timestamp: DateTime.now(),
+            );
+          }
+          break;
+        case 'ventilation':
+          _actuators = _actuators.copyWith(
+              ventilation: value, updatedAt: DateTime.now());
+          if (value) {
+            final cooledTemp = _telemetry.airTemp > _settings.maxAirTemp
+                ? max(
+                    16.0,
+                    min(_telemetry.airTemp - 3.5,
+                        _settings.maxAirTemp - 1.5),
+                  )
+                : max(16.0, _telemetry.airTemp - 2.8);
+            _telemetry = _telemetry.copyWith(
+              airTemp: _round1(cooledTemp),
+              airHumidity: _round1(max(35.0, _telemetry.airHumidity - 5.0)),
+              timestamp: DateTime.now(),
+            );
+            _hasActiveAlert = false;
+            _alertMessage = null;
+            _alertService.clearAllAlerts();
+          }
+          break;
+        case 'heater':
+          _actuators =
+              _actuators.copyWith(heater: value, updatedAt: DateTime.now());
+          if (value) {
+            _telemetry = _telemetry.copyWith(
+              airTemp: _round1(min(35.0, _telemetry.airTemp + 3.0)),
+              timestamp: DateTime.now(),
+            );
+          }
+          break;
+        case 'lighting':
+          _actuators =
+              _actuators.copyWith(lighting: value, updatedAt: DateTime.now());
+          if (value) {
+            _telemetry = _telemetry.copyWith(
+              lightLevel: min(25000.0, _telemetry.lightLevel + 6000.0),
+              timestamp: DateTime.now(),
+            );
+          }
+          break;
+      }
+      _telemetryService.setTelemetry(_telemetry);
     }
 
     _commandLatencySeconds =
         DateTime.now().difference(startTime).inMilliseconds / 1000.0 + 0.45;
-    if (_commandLatencySeconds > 4.9)
+    if (_commandLatencySeconds > 4.9) {
       _commandLatencySeconds = 4.8; // strict < 5s limit
-    _telemetryService.setTelemetry(_telemetry);
+    }
     notifyListeners();
   }
 
@@ -247,14 +289,21 @@ class GreenhouseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // M7 Update Thresholds
-  void updateThresholds({double? minSoil, double? maxTemp}) {
+  // M7 Update Thresholds (reject invalid/out-of-range values such as -50%)
+  bool updateThresholds({double? minSoil, double? maxTemp}) {
+    if (minSoil != null && (minSoil < 5.0 || minSoil > 90.0)) {
+      return false;
+    }
+    if (maxTemp != null && (maxTemp < 10.0 || maxTemp > 45.0)) {
+      return false;
+    }
     _settings = _settings.copyWith(
       minSoilMoisture: minSoil ?? _settings.minSoilMoisture,
       maxAirTemp: maxTemp ?? _settings.maxAirTemp,
     );
     _alertService.evaluateTelemetry(_telemetry, _settings);
     notifyListeners();
+    return true;
   }
 
   // Trigger Overheating for Demo (Scenario 2)
@@ -266,6 +315,7 @@ class GreenhouseProvider extends ChangeNotifier {
       lightLevel: 18000.0,
       timestamp: DateTime.now(),
     );
+    _telemetryService.setTelemetry(_telemetry);
     _hasActiveAlert = true;
     _alertMessage = l10n.tr('alert_overheat_title');
     _alertService.triggerDemoOverheat();
@@ -279,37 +329,43 @@ class GreenhouseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Live data ticker (simulates live sensor variations if not connected to live backend)
+  // Live data ticker (simulates live sensor variations only in mock/offline mode)
   void _startLiveTicker() {
     _ticker = Timer.periodic(const Duration(seconds: 15), (timer) {
-      if (_isOffline) return;
+      if (_isOffline || !_supabaseService.isMockMode) return;
 
       final rand = Random();
-      double tempDelta = (rand.nextDouble() - 0.5) * 0.4;
-      double soilDelta = _actuators.irrigation ? 1.5 : -0.2;
-      double humidityDelta = (rand.nextDouble() - 0.5) * 0.8;
+      final tempDelta = (rand.nextDouble() - 0.5) * 0.4;
+      final soilDelta = _actuators.irrigation ? 1.5 : -0.2;
+      final humidityDelta = (rand.nextDouble() - 0.5) * 0.8;
 
-      double newTemp = (_telemetry.airTemp + tempDelta).clamp(14.0, 38.0);
-      double newSoil = (_telemetry.soilMoisture + soilDelta).clamp(15.0, 95.0);
-      double newHumidity =
+      final newTemp = (_telemetry.airTemp + tempDelta).clamp(14.0, 38.0);
+      final newSoil = (_telemetry.soilMoisture + soilDelta).clamp(15.0, 95.0);
+      final newHumidity =
           (_telemetry.airHumidity + humidityDelta).clamp(30.0, 95.0);
 
-      // M4: Auto mode rule test
+      // M4: Auto mode rule evaluation
       if (_settings.autoMode &&
           newSoil < _settings.minSoilMoisture &&
           !_actuators.irrigation) {
         _actuators = _actuators.copyWith(irrigation: true);
         _actuatorService.setActuatorState(name: 'irrigation', value: true);
       }
+      if (_settings.autoMode &&
+          newTemp > _settings.maxAirTemp &&
+          !_actuators.ventilation) {
+        _actuators = _actuators.copyWith(ventilation: true);
+        _actuatorService.setActuatorState(name: 'ventilation', value: true);
+      }
 
-      _telemetry = TelemetryModel(
-        airTemp: double.parse(newTemp.toStringAsFixed(1)),
-        airHumidity: double.parse(newHumidity.toStringAsFixed(1)),
-        soilMoisture: double.parse(newSoil.toStringAsFixed(1)),
-        lightLevel: _telemetry.lightLevel,
+      _telemetry = _telemetry.copyWith(
+        airTemp: _round1(newTemp),
+        airHumidity: _round1(newHumidity),
+        soilMoisture: _round1(newSoil),
         timestamp: DateTime.now(),
       );
 
+      _telemetryService.setTelemetry(_telemetry);
       _alertService.evaluateTelemetry(_telemetry, _settings);
       notifyListeners();
     });
@@ -323,6 +379,10 @@ class GreenhouseProvider extends ChangeNotifier {
     _latencySub?.cancel();
     _alertsSub?.cancel();
     _stalenessSub?.cancel();
+    _authService.dispose();
+    _telemetryService.dispose();
+    _actuatorService.dispose();
+    _alertService.dispose();
     super.dispose();
   }
 }

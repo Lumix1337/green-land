@@ -15,12 +15,14 @@ class DashboardScreen extends StatelessWidget {
     final provider = context.watch<GreenhouseProvider>();
     final l10n = provider.l10n;
     final telemetry = provider.telemetry;
+    final settings = provider.settings;
 
-    // Evaluate health statuses for 4 parameters
-    // 1. Air Temperature (Optimal: 18 - 28°C)
-    final tempStatus = telemetry.airTemp > 30.0
+    // Evaluate health statuses for 4 parameters using configured M7 thresholds
+    // 1. Air Temperature
+    final tempStatus = telemetry.airTemp > settings.maxAirTemp + 2.0
         ? MetricStatus.danger
-        : (telemetry.airTemp < 18.0 || telemetry.airTemp > 28.0)
+        : (telemetry.airTemp < settings.minAirTemp ||
+                telemetry.airTemp > settings.maxAirTemp)
             ? MetricStatus.warning
             : MetricStatus.normal;
     final tempStatusText = tempStatus == MetricStatus.normal
@@ -29,7 +31,7 @@ class DashboardScreen extends StatelessWidget {
             ? l10n.tr('chip_overheat')
             : l10n.tr('chip_warning'));
 
-    // 2. Air Humidity (Optimal: 50 - 75%)
+    // 2. Air Humidity (Optimal: 40 - 85%)
     final humidityStatus =
         (telemetry.airHumidity < 40.0 || telemetry.airHumidity > 85.0)
             ? MetricStatus.warning
@@ -38,10 +40,10 @@ class DashboardScreen extends StatelessWidget {
         ? l10n.tr('chip_normal')
         : l10n.tr('chip_warning');
 
-    // 3. Soil Moisture (Optimal: 35 - 70%)
-    final soilStatus = telemetry.soilMoisture < 30.0
+    // 3. Soil Moisture
+    final soilStatus = telemetry.soilMoisture < settings.minSoilMoisture
         ? MetricStatus.danger
-        : telemetry.soilMoisture < 35.0
+        : telemetry.soilMoisture < settings.minSoilMoisture + 5.0
             ? MetricStatus.warning
             : MetricStatus.normal;
     final soilStatusText = soilStatus == MetricStatus.normal
@@ -49,6 +51,10 @@ class DashboardScreen extends StatelessWidget {
         : (soilStatus == MetricStatus.danger
             ? l10n.tr('chip_drought')
             : l10n.tr('chip_dry'));
+
+    final isAllOptimal = tempStatus == MetricStatus.normal &&
+        humidityStatus == MetricStatus.normal &&
+        soilStatus == MetricStatus.normal;
 
     // 4. Light Level (Optimal: 5000 - 20000 Lux in daytime)
     final lightStatus = MetricStatus.normal;
@@ -144,14 +150,14 @@ class DashboardScreen extends StatelessWidget {
                 // STATUS & OFFLINE BANNER (M2 5-second assessment + M8 failure handling)
                 StatusBanner(
                   isOffline: provider.isOffline,
-                  isAllGood: telemetry.isOptimal,
+                  isAllGood: isAllOptimal,
                   hasAlert: provider.hasActiveAlert,
                   alertMessage: tempStatus == MetricStatus.danger
                       ? '${l10n.tr('chip_overheat')} · ${telemetry.airTemp.toStringAsFixed(1)} °C'
                       : provider.alertMessage,
                   alertActionText: l10n.tr('open_controls'),
                   onOpenControls: onOpenControls,
-                  statusText: telemetry.isOptimal
+                  statusText: isAllOptimal
                       ? l10n.tr('status_all_good')
                       : l10n.tr('status_warning'),
                   lastUpdateText:
@@ -253,7 +259,10 @@ class DashboardScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              l10n.tr('auto_rule_active'),
+                              l10n.autoRuleSummary(
+                                settings.minSoilMoisture,
+                                settings.maxAirTemp,
+                              ),
                               style: const TextStyle(
                                 color: AppTheme.textSecondary,
                                 fontSize: 11,
@@ -263,8 +272,8 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ),
                       Switch(
-                        value: provider.settings.autoMode,
-                        activeColor: AppTheme.primary,
+                        value: settings.autoMode,
+                        activeThumbColor: AppTheme.primary,
                         onChanged: (val) => provider.toggleAutoMode(val),
                       ),
                     ],

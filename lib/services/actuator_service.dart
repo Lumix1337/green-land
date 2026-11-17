@@ -71,7 +71,6 @@ class ActuatorService {
   }) async {
     final stopwatch = Stopwatch()..start();
     final client = _supabaseService.client;
-    final previousState = _actuators;
 
     // Optimistic state calculation
     ActuatorModel updated;

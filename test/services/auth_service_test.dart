@@ -43,11 +43,16 @@ void main() {
       expect(authService.isAuthenticated, isFalse);
     });
 
-    test('Sign up creates new account with proper userId', () async {
+    test('Sign up creates new account and rejects wrong password on subsequent sign in', () async {
       final res = await authService.signUp(email: 'testfarmer@greenland.kz', password: 'securePassword2026');
       expect(res.isSuccess, isTrue);
       expect(authService.isAuthenticated, isTrue);
       expect(authService.currentEmail, equals('testfarmer@greenland.kz'));
+
+      await authService.signOut();
+      final badLogin = await authService.signIn(email: 'testfarmer@greenland.kz', password: 'wrongPassword');
+      expect(badLogin.isSuccess, isFalse);
+      expect(badLogin.errorMessage, isNotNull);
     });
   });
 }

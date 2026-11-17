@@ -10,11 +10,71 @@ class SettingsScreen extends StatelessWidget {
 
   const SettingsScreen({super.key, required this.onLogout});
 
+  Future<void> _showThresholdDialog({
+    required BuildContext context,
+    required String title,
+    required String unit,
+    required double currentValue,
+    required double min,
+    required double max,
+    required ValueChanged<double> onSaved,
+  }) async {
+    final controller =
+        TextEditingController(text: currentValue.toStringAsFixed(0));
+    final formKey = GlobalKey<FormState>();
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(title, style: const TextStyle(fontSize: 16)),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: controller,
+              keyboardType:
+                  const TextInputType.numberWithOptions(signed: true, decimal: true),
+              decoration: InputDecoration(
+                suffixText: unit,
+                helperText: '${min.toStringAsFixed(0)}–${max.toStringAsFixed(0)} $unit',
+              ),
+              validator: (raw) {
+                final parsed = double.tryParse((raw ?? '').trim());
+                if (parsed == null || parsed < min || parsed > max) {
+                  return 'Allowed range: ${min.toStringAsFixed(0)}–${max.toStringAsFixed(0)} $unit';
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  onSaved(double.parse(controller.text.trim()));
+                  Navigator.of(dialogContext).pop();
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<GreenhouseProvider>();
     final l10n = provider.l10n;
     final settings = provider.settings;
+    final email = provider.userEmail.trim();
+    final avatarLetter = email.isNotEmpty ? email[0].toUpperCase() : 'G';
 
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
@@ -51,10 +111,10 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 26,
-                      backgroundColor: AppTheme.primary.withOpacity(0.15),
-                      child: const Text(
-                        'E',
-                        style: TextStyle(
+                      backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
+                      child: Text(
+                        avatarLetter,
+                        style: const TextStyle(
                           color: AppTheme.primaryDark,
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
@@ -67,25 +127,27 @@ class SettingsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10n.tr('profile_owner'),
-                            style: TextStyle(
+                            l10n.tr('account_title'),
+                            style: const TextStyle(
                               color: AppTheme.textPrimary,
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            provider.userEmail,
-                            style: const TextStyle(
-                              color: AppTheme.textMuted,
-                              fontSize: 12,
+                          if (email.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              email,
+                              style: const TextStyle(
+                                color: AppTheme.textMuted,
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
+                          ],
                           const SizedBox(height: 4),
                           Text(
                             l10n.tr('profile_greenhouse'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppTheme.primary,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -180,18 +242,35 @@ class SettingsScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Text(
-                          '${settings.minSoilMoisture.toStringAsFixed(0)}%',
-                          style: const TextStyle(
-                            color: AppTheme.primary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
+                        InkWell(
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: () => _showThresholdDialog(
+                            context: context,
+                            title: l10n.tr('min_soil_threshold'),
+                            unit: '%',
+                            currentValue: settings.minSoilMoisture,
+                            min: 15.0,
+                            max: 60.0,
+                            onSaved: (val) =>
+                                provider.updateThresholds(minSoil: val),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            child: Text(
+                              '${settings.minSoilMoisture.toStringAsFixed(0)}%',
+                              style: const TextStyle(
+                                color: AppTheme.primary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
                     Slider(
-                      value: settings.minSoilMoisture,
+                      value: settings.minSoilMoisture.clamp(15.0, 60.0),
                       min: 15.0,
                       max: 60.0,
                       divisions: 9,
@@ -230,18 +309,35 @@ class SettingsScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Text(
-                          '${settings.maxAirTemp.toStringAsFixed(0)}°C',
-                          style: const TextStyle(
-                            color: Color(0xFFE65100),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
+                        InkWell(
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: () => _showThresholdDialog(
+                            context: context,
+                            title: l10n.tr('max_temp_threshold'),
+                            unit: '°C',
+                            currentValue: settings.maxAirTemp,
+                            min: 22.0,
+                            max: 38.0,
+                            onSaved: (val) =>
+                                provider.updateThresholds(maxTemp: val),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            child: Text(
+                              '${settings.maxAirTemp.toStringAsFixed(0)}°C',
+                              style: const TextStyle(
+                                color: Color(0xFFE65100),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
                     Slider(
-                      value: settings.maxAirTemp,
+                      value: settings.maxAirTemp.clamp(22.0, 38.0),
                       min: 22.0,
                       max: 38.0,
                       divisions: 16,
@@ -284,7 +380,7 @@ class SettingsScreen extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             l10n.tr('cached_readings'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF8D6E63),
                               fontSize: 11,
                             ),
@@ -294,7 +390,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     Switch(
                       value: provider.isOffline,
-                      activeColor: const Color(0xFFE65100),
+                      activeThumbColor: const Color(0xFFE65100),
                       onChanged: (val) => provider.toggleOfflineStressTest(val),
                     ),
                   ],

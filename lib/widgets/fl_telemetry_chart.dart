@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../theme/app_theme.dart';
@@ -26,10 +27,24 @@ class FlTelemetryChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (values.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.dividerColor),
+        ),
+        child: Text(title,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+      );
+    }
+
     final double maxVal = values.reduce((a, b) => a > b ? a : b);
     final double minVal = values.reduce((a, b) => a < b ? a : b);
-    final double yMin = (minVal * 0.8).clamp(0.0, double.infinity);
-    final double yMax = maxVal * 1.15;
+    final double yMin =
+        (math.min(minVal, threshold) * 0.85).clamp(0.0, double.infinity);
+    final double yMax = math.max(maxVal * 1.15, threshold * 1.1);
 
     final spots =
         List.generate(values.length, (i) => FlSpot(i.toDouble(), values[i]));
@@ -64,7 +79,7 @@ class FlTelemetryChart extends StatelessWidget {
                   horizontalInterval:
                       (yMax - yMin) / 3 > 0 ? (yMax - yMin) / 3 : 5.0,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color: AppTheme.dividerColor.withOpacity(0.5),
+                    color: AppTheme.dividerColor.withValues(alpha: 0.5),
                     strokeWidth: 1,
                   ),
                 ),
@@ -171,7 +186,9 @@ class FlTelemetryChart extends StatelessWidget {
                     dotData: FlDotData(
                       show: true,
                       getDotPainter: (spot, percent, barData, index) {
-                        final isAlert = spot.y < threshold && unit == '%';
+                        final isAlert = unit == '%'
+                            ? spot.y < threshold
+                            : spot.y > threshold;
                         return FlDotCirclePainter(
                           radius: isAlert ? 5.5 : 4,
                           color: isAlert ? AppTheme.statusDanger : Colors.white,
@@ -182,7 +199,7 @@ class FlTelemetryChart extends StatelessWidget {
                     ),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: color.withOpacity(0.14),
+                      color: color.withValues(alpha: 0.14),
                     ),
                   ),
                 ],
