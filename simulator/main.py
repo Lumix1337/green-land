@@ -36,9 +36,16 @@ def run_cli(argv: Optional[List[str]] = None) -> int:
             "stress-drought",
             "stress-offline",
             "seed-history",
+            "viewer3d",
         ],
         default="demo",
         help="Simulation execution mode",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8080,
+        help="HTTP port for --mode viewer3d (default 8080)",
     )
     parser.add_argument(
         "--ticks",
@@ -110,6 +117,12 @@ def run_cli(argv: Optional[List[str]] = None) -> int:
         for item in history:
             bridge.insert_telemetry(item)
         print(f"📊 [M6 History] Generated {len(history)} 7-day historical telemetry checkpoints.")
+        return 0
+
+    if args.mode == "viewer3d":
+        from .viewer_server import start_viewer_server
+
+        start_viewer_server(port=args.port)
         return 0
 
     # Default demo / live simulation loop
