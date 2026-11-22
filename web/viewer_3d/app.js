@@ -13,6 +13,27 @@ if (isEmbedded) {
   document.documentElement.classList.add('embedded-mode');
 }
 
+const CAMERA_LABELS = {
+  en: { overview: 'Overview', inside: 'Inside', roof: 'Vents', top: 'Top' },
+  ru: { overview: 'Обзор', inside: 'Внутри', roof: 'Фрамуги', top: 'Сверху' },
+  kz: { overview: 'Шолу', inside: 'Ішінде', roof: 'Желкөздер', top: 'Үстінен' },
+};
+
+function applyLanguage(lang) {
+  const labels = CAMERA_LABELS[lang] || CAMERA_LABELS.ru;
+  document.querySelectorAll('.btn-cam').forEach((btn) => {
+    const key = btn.dataset.cam;
+    if (labels[key]) {
+      btn.textContent = labels[key];
+    }
+  });
+}
+
+const initialLang = urlParams.get('lang');
+if (initialLang) {
+  applyLanguage(initialLang);
+}
+
 // --- 1. Three.js Scene, Camera & Renderer ---
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
@@ -411,6 +432,9 @@ document.querySelectorAll('button[data-stress]').forEach((btn) => {
 window.addEventListener('message', (event) => {
   const msg = event.data;
   if (!msg || typeof msg !== 'object' || msg.type !== 'greenland_state') return;
+  if (msg.language) {
+    applyLanguage(msg.language);
+  }
   simState = {
     ...simState,
     telemetry: { ...simState.telemetry, ...(msg.telemetry || {}) },

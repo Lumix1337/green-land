@@ -7,6 +7,7 @@ class DigitalTwinEmbed extends StatelessWidget {
   final ActuatorModel actuators;
   final bool isOffline;
   final String nativeHint;
+  final String languageCode;
 
   const DigitalTwinEmbed({
     super.key,
@@ -14,6 +15,7 @@ class DigitalTwinEmbed extends StatelessWidget {
     required this.actuators,
     required this.isOffline,
     required this.nativeHint,
+    this.languageCode = 'en',
   });
 
   @override

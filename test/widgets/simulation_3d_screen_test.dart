@@ -19,9 +19,13 @@ void main() {
       );
 
       expect(find.text('3D Digital Twin'), findsOneWidget);
+      expect(find.text('48200 ₸/mo'), findsNothing);
+      expect(find.textContaining('Live 3D simulation'), findsNothing);
       expect(find.text('3D Scene Actuators'), findsOneWidget);
       expect(find.text('Overheat 32.8°C'), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Overheat 32.8°C'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Overheat 32.8°C'));
       await tester.pumpAndSettle();
       expect(provider.telemetry.isOverheated(), isTrue);

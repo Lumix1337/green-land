@@ -13,35 +13,11 @@ class Simulation3DScreen extends StatelessWidget {
     final l10n = provider.l10n;
     final telemetry = provider.telemetry;
     final actuators = provider.actuators;
-    final savings = provider.energySavings;
 
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
         title: Text(l10n.tr('sim3d_title')),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  '${savings.monthlySavedTenge.toStringAsFixed(0)} ₸/mo',
-                  style: const TextStyle(
-                    color: AppTheme.primaryDark,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -49,15 +25,6 @@ class Simulation3DScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                l10n.tr('sim3d_subtitle'),
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 12),
-
               // Live 4-Sensor Telemetry Strip
               Row(
                 children: [
@@ -117,6 +84,7 @@ class Simulation3DScreen extends StatelessWidget {
                     actuators: actuators,
                     isOffline: provider.isOffline,
                     nativeHint: l10n.tr('sim3d_native_hint'),
+                    languageCode: l10n.language.name,
                   ),
                 ),
               ),

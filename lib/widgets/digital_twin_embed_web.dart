@@ -11,6 +11,7 @@ class DigitalTwinEmbed extends StatefulWidget {
   final ActuatorModel actuators;
   final bool isOffline;
   final String nativeHint;
+  final String languageCode;
 
   const DigitalTwinEmbed({
     super.key,
@@ -18,6 +19,7 @@ class DigitalTwinEmbed extends StatefulWidget {
     required this.actuators,
     required this.isOffline,
     required this.nativeHint,
+    this.languageCode = 'en',
   });
 
   @override
@@ -36,7 +38,7 @@ class _DigitalTwinEmbedState extends State<DigitalTwinEmbed> {
     _viewType = 'greenland-3d-twin-$_viewCounter';
 
     final iframe = html.IFrameElement()
-      ..src = 'viewer_3d/index.html?embedded=1'
+      ..src = 'viewer_3d/index.html?embedded=1&lang=${widget.languageCode}'
       ..style.border = 'none'
       ..style.width = '100%'
       ..style.height = '100%'
@@ -65,6 +67,7 @@ class _DigitalTwinEmbedState extends State<DigitalTwinEmbed> {
     win.postMessage({
       'type': 'greenland_state',
       'online': !widget.isOffline,
+      'language': widget.languageCode,
       'telemetry': {
         'air_temp': t.airTemp,
         'air_humidity': t.airHumidity,
