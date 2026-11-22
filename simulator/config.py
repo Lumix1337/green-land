@@ -2,25 +2,74 @@
 Configuration constants for the GreenLand Greenhouse Simulator.
 
 Tailored for Persona Erlan: 800 m2 commercial tomato greenhouse in Almaty region.
+Automatically loads `.env` and `assets/config/supabase.env` (without overwriting
+already-exported shell variables) so Python and Flutter share the same credentials.
 """
 
 import os
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, Iterable, Optional
+
+DEFAULT_SUPABASE_URL = "https://greenland-smart-greenhouse.supabase.co"
+DEFAULT_SUPABASE_ANON_KEY = (
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
+    "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdyZWVubGFuZC1zbWFydC1ncmVlbmhvdXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0."
+    "mock_signature_for_offline_and_eval"
+)
+DEFAULT_GREENHOUSE_ID = "gh_erlan_01"
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def load_env_file(env_path: Path, override: bool = False) -> Dict[str, str]:
+    """Parse a KEY=VALUE `.env` file into `os.environ` using Python stdlib only."""
+    loaded: Dict[str, str] = {}
+    if not env_path.is_file():
+        return loaded
+
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if not key:
+            continue
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+            value = value[1:-1]
+        loaded[key] = value
+        if override or key not in os.environ:
+            os.environ[key] = value
+    return loaded
+
+
+def load_project_env(
+    search_paths: Optional[Iterable[Path]] = None,
+    override: bool = False,
+) -> Dict[str, str]:
+    """Load Supabase and simulator variables from `.env` and `assets/config/supabase.env`."""
+    paths = (
+        list(search_paths)
+        if search_paths is not None
+        else [
+            REPO_ROOT / ".env",
+            REPO_ROOT / "assets" / "config" / "supabase.env",
+        ]
+    )
+    merged: Dict[str, str] = {}
+    for path in paths:
+        merged.update(load_env_file(path, override=override))
+    return merged
 
 
 @dataclass(frozen=True)
 class SimulatorConfig:
     # Supabase connection parameters
-    supabase_url: str = os.environ.get(
-        "SUPABASE_URL", "https://greenland-smart-greenhouse.supabase.co"
-    )
-    supabase_anon_key: str = os.environ.get(
-        "SUPABASE_ANON_KEY",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-        "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdyZWVubGFuZC1zbWFydC1ncmVlbmhvdXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0."
-        "mock_signature_for_offline_and_eval",
-    )
-    greenhouse_id: str = os.environ.get("GREENHOUSE_ID", "gh_erlan_01")
+    supabase_url: str = DEFAULT_SUPABASE_URL
+    supabase_anon_key: str = DEFAULT_SUPABASE_ANON_KEY
+    greenhouse_id: str = DEFAULT_GREENHOUSE_ID
 
     # Timing & SLA constraints (Brief requirements: telemetry every 15s, command latency < 5s)
     telemetry_interval_sec: float = 15.0
@@ -53,5 +102,19 @@ class SimulatorConfig:
     night_start_hour: int = 23
     night_end_hour: int = 7
 
+    @classmethod
+    def from_env(cls, env_paths: Optional[Iterable[Path]] = None) -> "SimulatorConfig":
+        load_project_env(search_paths=env_paths)
+        anon_key = (
+            os.environ.get("SUPABASE_ANON_KEY")
+            or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
+            or DEFAULT_SUPABASE_ANON_KEY
+        )
+        return cls(
+            supabase_url=os.environ.get("SUPABASE_URL", DEFAULT_SUPABASE_URL),
+            supabase_anon_key=anon_key,
+            greenhouse_id=os.environ.get("GREENHOUSE_ID", DEFAULT_GREENHOUSE_ID),
+        )
 
-DEFAULT_CONFIG = SimulatorConfig()
+
+DEFAULT_CONFIG = SimulatorConfig.from_env()
