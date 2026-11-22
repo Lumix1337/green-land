@@ -463,6 +463,25 @@ html.no-native-switch input[type="checkbox"][switch]:checked::after {
   text-overflow: ellipsis;
 }
 
+/* Embedded inside Flutter Web iframe (?embedded=1): show clean 3D scene + camera pills only */
+html.embedded-mode .hud-header,
+html.embedded-mode .hud-panel,
+html.embedded-mode .mobile-dock,
+html.embedded-mode .alert-banner,
+html.embedded-mode .event-ticker {
+  display: none !important;
+}
+
+html.embedded-mode .hud-footer {
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  padding: 6px 8px;
+  justify-content: center;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 /* Mobile Bottom Navigation Dock (hidden on desktop) */
 .mobile-dock {
   display: none;

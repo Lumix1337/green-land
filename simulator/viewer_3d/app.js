@@ -7,6 +7,12 @@ if (!('switch' in HTMLInputElement.prototype)) {
   document.documentElement.classList.add('no-native-switch');
 }
 
+const urlParams = new URLSearchParams(window.location.search);
+const isEmbedded = urlParams.get('embedded') === '1';
+if (isEmbedded) {
+  document.documentElement.classList.add('embedded-mode');
+}
+
 // --- 1. Three.js Scene, Camera & Renderer ---
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
@@ -401,9 +407,29 @@ document.querySelectorAll('button[data-stress]').forEach((btn) => {
   });
 });
 
-// Poll simulator every 1.2s
-fetchState();
-setInterval(fetchState, 1200);
+// Listen for live state pushed from Flutter host via postMessage (embedded mode)
+window.addEventListener('message', (event) => {
+  const msg = event.data;
+  if (!msg || typeof msg !== 'object' || msg.type !== 'greenland_state') return;
+  simState = {
+    ...simState,
+    telemetry: { ...simState.telemetry, ...(msg.telemetry || {}) },
+    actuators: { ...simState.actuators, ...(msg.actuators || {}) },
+    status: {
+      ...simState.status,
+      online: msg.online !== undefined ? Boolean(msg.online) : true,
+    },
+  };
+  if (!isEmbedded) {
+    renderHud(simState);
+  }
+});
+
+// Poll simulator every 1.2s when running standalone (skip in Flutter embedded iframe)
+if (!isEmbedded) {
+  fetchState();
+  setInterval(fetchState, 1200);
+}
 
 // --- 8. Main 60fps Animation Loop (3D Actuator Effects) ---
 const clock = new THREE.Clock();

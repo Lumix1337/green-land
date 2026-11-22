@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>GreenLand 3D — Цифровой двойник теплицы</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="canvas-container" aria-label="Интерактивная 3D-сцена теплицы GreenLand"></div>
+
+  <!-- Top Header Bar -->
+  <header class="hud-header">
+    <div class="brand">
+      <span class="brand-dot" id="connection-dot" aria-hidden="true"></span>
+      <div>
+        <h1>🌱 GreenLand 3D Digital Twin</h1>
+        <p class="subtitle">Теплица Ерлана · 800 м² · Алматы</p>
+      </div>
+    </div>
+
+    <div class="header-badges">
+      <div class="savings-pill" title="Экономия по ночному тарифу (11.20 ₸) и прогнозу погоды">
+        <span class="pill-label">Экономия / мес</span>
+        <strong id="monthly-savings">48 200 ₸</strong>
+      </div>
+      <div class="latency-pill">
+        <span class="pill-label">SLA отклика</span>
+        <strong id="latency-value">0.45 s</strong>
+      </div>
+      <div class="status-pill optimal" id="health-pill">Оптимум</div>
+    </div>
+  </header>
+
+  <!-- M8 Offline / Critical Alert Banner -->
+  <div id="alert-banner" class="alert-banner hidden" role="status" aria-live="polite">
+    <span id="alert-banner-text"></span>
+  </div>
+
+  <!-- Left Telemetry Panel (Desktop sidebar / Mobile bottom sheet) -->
+  <aside class="hud-panel panel-left" id="panel-telemetry" aria-label="Телеметрия микроклимата">
+    <div class="panel-header">
+      <h2>Телеметрия (M2)</h2>
+      <button type="button" class="btn-sheet-close" data-close-sheet aria-label="Свернуть панель">✕</button>
+    </div>
+    <div class="metric-grid">
+      <article class="metric-card" id="card-temp">
+        <span class="metric-label">🌡️ Температура</span>
+        <strong class="metric-value" id="val-temp">24.2 °C</strong>
+        <span class="metric-hint">Норма: 18–28 °C</span>
+      </article>
+      <article class="metric-card" id="card-hum">
+        <span class="metric-label">💨 Влажность воздуха</span>
+        <strong class="metric-value" id="val-hum">62.0 %</strong>
+        <span class="metric-hint">Норма: 50–75 %</span>
+      </article>
+      <article class="metric-card" id="card-soil">
+        <span class="metric-label">💧 Влажность почвы</span>
+        <strong class="metric-value" id="val-soil">45.5 %</strong>
+        <span class="metric-hint">Порог полива: 30 %</span>
+      </article>
+      <article class="metric-card" id="card-light">
+        <span class="metric-label">☀️ Освещённость</span>
+        <strong class="metric-value" id="val-light">12.4 kLux</strong>
+        <span class="metric-hint" id="val-tariff">Дневной тариф: 28.50 ₸</span>
+      </article>
+    </div>
+
+    <div class="resource-box">
+      <div class="resource-row">
+        <span>Текущая нагрузка</span>
+        <strong id="val-power">0.0 kW</strong>
+      </div>
+      <div class="resource-row">
+        <span>Экономия воды / мес</span>
+        <strong id="val-water">0 л</strong>
+      </div>
+      <div class="resource-row">
+        <span>Улица (Алматы)</span>
+        <strong id="val-outdoor">— °C</strong>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right Controls & Stress-Test Panel (Desktop sidebar / Mobile bottom sheet) -->
+  <aside class="hud-panel panel-right" id="panel-controls" aria-label="Управление приводами и стресс-тесты">
+    <div class="panel-header">
+      <h2>Приводы (M3)</h2>
+      <button type="button" class="btn-sheet-close" data-close-sheet aria-label="Свернуть панель">✕</button>
+    </div>
+    <div class="controls-list">
+      <label class="switch-row" for="toggle-irrigation">
+        <span class="switch-info">
+          <strong>💧 Капельный полив</strong>
+          <small>Насос 2.2 кВт · капли в 3D</small>
+        </span>
+        <input id="toggle-irrigation" type="checkbox" switch data-actuator="irrigation" />
+      </label>
+
+      <label class="switch-row" for="toggle-ventilation">
+        <span class="switch-info">
+          <strong>🪟 Вентиляция</strong>
+          <small>Фрамуги + вентиляторы 1.5 кВт</small>
+        </span>
+        <input id="toggle-ventilation" type="checkbox" switch data-actuator="ventilation" />
+      </label>
+
+      <label class="switch-row" for="toggle-heater">
+        <span class="switch-info">
+          <strong>🔥 Обогрев</strong>
+          <small>Тепловентиляторы 18.0 кВт</small>
+        </span>
+        <input id="toggle-heater" type="checkbox" switch data-actuator="heater" />
+      </label>
+
+      <label class="switch-row" for="toggle-lighting">
+        <span class="switch-info">
+          <strong>💡 Фитоосвещение</strong>
+          <small>LED-спектр 14.0 кВт</small>
+        </span>
+        <input id="toggle-lighting" type="checkbox" switch data-actuator="lighting" />
+      </label>
+    </div>
+
+    <button type="button" id="btn-emergency" class="btn-danger">
+      ⛔ Аварийно выключить всё
+    </button>
+
+    <hr class="divider" />
+
+    <h2>Стресс-тесты (M5 / M8)</h2>
+    <div class="stress-grid">
+      <button type="button" class="btn-stress" data-stress="overheat">🔥 Перегрев 32.8°C</button>
+      <button type="button" class="btn-stress" data-stress="drought">🏜️ Засуха 24.5%</button>
+      <button type="button" class="btn-stress" data-stress="offline">📡 Обрыв M8</button>
+      <button type="button" class="btn-stress btn-recover" data-stress="recover">✅ Норма</button>
+    </div>
+  </aside>
+
+  <!-- Bottom Camera Bar & Event Log -->
+  <footer class="hud-footer">
+    <div class="camera-bar" role="group" aria-label="Ракурсы камеры">
+      <button type="button" class="btn-cam active" data-cam="overview">🎥 Обзор</button>
+      <button type="button" class="btn-cam" data-cam="inside">🌿 Внутри</button>
+      <button type="button" class="btn-cam" data-cam="roof">🪟 Фрамуги</button>
+      <button type="button" class="btn-cam" data-cam="top">🗺️ Сверху</button>
+    </div>
+    <div class="event-ticker" id="event-ticker">Загрузка 3D-модели Blender...</div>
+  </footer>
+
+  <!-- Mobile Bottom Navigation Dock (visible <= 900px) -->
+  <nav class="mobile-dock" aria-label="Мобильная навигация">
+    <button type="button" class="dock-btn active" data-sheet="none" aria-pressed="true">
+      <span aria-hidden="true">🎥</span>
+      <span>3D-сцена</span>
+    </button>
+    <button type="button" class="dock-btn" data-sheet="telemetry" aria-pressed="false">
+      <span aria-hidden="true">📊</span>
+      <span>Датчики</span>
+    </button>
+    <button type="button" class="dock-btn" data-sheet="controls" aria-pressed="false">
+      <span aria-hidden="true">🎛️</span>
+      <span>Приводы</span>
+    </button>
+  </nav>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
