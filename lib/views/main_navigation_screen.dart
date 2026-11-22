@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/greenhouse_provider.dart';
 import 'dashboard_screen.dart';
 import 'control_screen.dart';
+import 'simulation_3d_screen.dart';
 import 'analytics_screen.dart';
 import 'settings_screen.dart';
 
@@ -26,6 +27,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final screens = [
       DashboardScreen(onOpenControls: () => setState(() => _currentIndex = 1)),
       const ControlScreen(),
+      const Simulation3DScreen(),
       const AnalyticsScreen(),
       SettingsScreen(onLogout: widget.onLogout),
     ];
@@ -55,6 +57,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             icon:
                 Image.asset('assets/figma/controls.png', width: 21, height: 21),
             label: l10n.tr('nav_control'),
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.view_in_ar_rounded, size: 22),
+            label: l10n.tr('nav_simulation'),
           ),
           NavigationDestination(
             icon: Image.asset('assets/figma/analytics.png',

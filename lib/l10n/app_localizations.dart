@@ -29,6 +29,46 @@ class AppLocalizations {
       AppLanguage.kz: 'Басқару',
       AppLanguage.en: 'Controls',
     },
+    'nav_simulation': {
+      AppLanguage.ru: '3D-теплица',
+      AppLanguage.kz: '3D-жылыжай',
+      AppLanguage.en: '3D Twin',
+    },
+    'sim3d_title': {
+      AppLanguage.ru: '3D Цифровой двойник',
+      AppLanguage.kz: '3D Цифрлық егіз',
+      AppLanguage.en: '3D Digital Twin',
+    },
+    'sim3d_subtitle': {
+      AppLanguage.ru: 'Живая 3D-симуляция теплицы Ерлана (Blender + Three.js)',
+      AppLanguage.kz: 'Ерлан жылыжайының тірі 3D-симуляциясы (Blender + Three.js)',
+      AppLanguage.en: 'Live 3D simulation of Erlan\'s greenhouse (Blender + Three.js)',
+    },
+    'sim3d_quick_controls': {
+      AppLanguage.ru: 'Приводы в 3D-сцене',
+      AppLanguage.kz: '3D-сахнадағы жетектер',
+      AppLanguage.en: '3D Scene Actuators',
+    },
+    'sim3d_stress_title': {
+      AppLanguage.ru: 'Сценарии стресс-теста',
+      AppLanguage.kz: 'Стресс-тест сценарийлері',
+      AppLanguage.en: 'Stress-test scenarios',
+    },
+    'sim3d_overheat_btn': {
+      AppLanguage.ru: 'Перегрев 32.8°C',
+      AppLanguage.kz: 'Қызып кету 32.8°C',
+      AppLanguage.en: 'Overheat 32.8°C',
+    },
+    'sim3d_reset': {
+      AppLanguage.ru: 'Сбросить в норму',
+      AppLanguage.kz: 'Қалыпқа келтіру',
+      AppLanguage.en: 'Reset to normal',
+    },
+    'sim3d_native_hint': {
+      AppLanguage.ru: 'Интерактивный WebGL доступен в Chrome (flutter run -d chrome) или через python -m simulator.main --mode viewer3d',
+      AppLanguage.kz: 'Интерактивті WebGL Chrome-да (flutter run -d chrome) немесе python -m simulator.main --mode viewer3d арқылы қолжетімді',
+      AppLanguage.en: 'Full interactive WebGL runs in Chrome (flutter run -d chrome) or via python -m simulator.main --mode viewer3d',
+    },
     'nav_analytics': {
       AppLanguage.ru: 'Аналитика',
       AppLanguage.kz: 'Талдау',
